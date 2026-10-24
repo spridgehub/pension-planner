@@ -277,7 +277,8 @@
       else if (t.fee != null) { setVal('fee', (t.fee * 100).toFixed(2)); markCustom(); run(); }
       else if (t.ageDelta) { setVal('p-age', num('p-age') + t.ageDelta); if ($('couple').checked) setVal('q-age', num('q-age') + t.ageDelta); markCustom(); run(); }
       else if (t.strategy) selectStrategy(t.strategy, true);
-      else if (t.deepDive) { openTab(t.deepDive); $('tabs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      else if (t.deepDive === 'gilts') $('sec-gilts').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else if (t.deepDive) { openTab(t.deepDive); $('sec-detail').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     }));
   }
   function markCustom() { state.persona = 'custom'; renderPickers(); }
@@ -370,7 +371,7 @@
   document.querySelectorAll('#tabs button').forEach((b) => b.addEventListener('click', () => { openTab(b.dataset.tab); save(); }));
   function renderTab() {
     if (!last) return;
-    ({ annuities: renderAnnuities, inflation: renderInflation, longevity: renderLongevity, gilts: renderGilts, all: renderAllOptions, method: renderHistorySummary })[state.tab]?.();
+    ({ annuities: renderAnnuities, inflation: renderInflation, longevity: renderLongevity, all: renderAllOptions, method: renderHistorySummary })[state.tab]?.();
   }
 
   const SPEC_KEYS = Object.keys(E.SPECS);
@@ -458,14 +459,6 @@
     chart('ch-survival', { type: 'line', data: { labels, datasets: ds }, options: o });
   }
 
-  function renderGilts() {
-    const rate = parseFloat($('gilt-rate').value);
-    const rows = E.SAMPLE_GILTS.map((g) => E.giltAfterTax(g, rate));
-    const best = [...rows].sort((x, y) => y.grossEquivalent - x.grossEquivalent)[0];
-    $('gilt-h').textContent = `${best.name} yields ${pc(best.grossYield, 2)} before tax; at a ${pc(rate, 0)} tax rate a savings account would need ${pc(best.grossEquivalent, 2)} to match it.`;
-    $('tbl-gilts').innerHTML = `<thead><tr><th>Gilt</th><th>Matures</th><th>Price</th><th>Gross yield</th><th>After tax</th><th>Savings equivalent</th><th>Tax free share</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.name)} <span class="gloss" style="display:inline">${r.ticker}</span></td><td>${new Date(r.maturity).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</td><td>${r.price.toFixed(2)}</td><td>${pc(r.grossYield, 2)}</td><td>${pc(r.netYield, 2)}</td><td><b>${pc(r.grossEquivalent, 2)}</b></td><td>${pc(r.taxFreeShareOfReturn, 0)}</td></tr>`).join('')}</tbody>`;
-  }
-
   function renderAllOptions() {
     const { h, B, s, paths } = last;
     const sub = paths.filter((_, i) => i % 2 === 0);
@@ -486,6 +479,161 @@
     $('history-summary').textContent = `${x.years.replace('-', ' to ')}: UK equities returned ${pc(x.equityReal)} a year above inflation, gilts ${pc(x.bondsReal)}, cash ${pc(x.cashReal)}; inflation averaged ${pc(x.inflation)}. Worst equity year ${x.worstEquityYear.year} (${pc(x.worstEquityYear.equity, 0)}), worst gilt year ${x.worstBondYear.year} (${pc(x.worstBondYear.bonds, 0)}), highest inflation ${x.highestInflationYear.year} (${pc(x.highestInflationYear.inflation, 0)}). Market data fetched ${new Date(NOW.fetched).toLocaleString('en-GB')}.`;
   }
 
+
+  // ---------- gilt calculator ----------
+  const G = { mode: 'growth', shift: 0 };
+  const G_AMOUNTS = [10000, 25000, 50000, 100000, 250000];
+  const G_SHIFTS = [-200, -150, -100, -50, 0, 50, 100, 150, 200];
+  const G_DEFAULT = { growth: 'Treasury 0.375% 2030', income: 'Treasury 4.125% 2029' };
+  const bpLabel = (bp) => (bp === 0 ? 'No change' : `${bp > 0 ? '+' : ''}${bp}bp`);
+  const fmtDate = (s, long) => new Date(s + 'T00:00:00Z').toLocaleDateString('en-GB', long ? { day: 'numeric', month: 'short', year: 'numeric' } : { month: 'short', year: '2-digit' });
+  const giltByName = (n) => E.GILTS.find((g) => g.name === n);
+  function giltList() {
+    const today = new Date().toISOString().slice(0, 10);
+    return E.GILTS.filter((g) => g.maturity > today && (G.mode === 'growth' ? g.coupon < E.LOW_COUPON : g.coupon >= E.HIGH_COUPON))
+      .sort((a, b) => a.maturity.localeCompare(b.maturity));
+  }
+  function setupGilts(keep) {
+    document.querySelectorAll('#g-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === G.mode)));
+    document.querySelectorAll('.g-growth').forEach((el) => { el.hidden = G.mode !== 'growth'; });
+    document.querySelectorAll('.g-income').forEach((el) => { el.hidden = G.mode !== 'income'; });
+    const prev = $('g-gilt').value, list = giltList();
+    $('g-gilt').innerHTML = list.map((g) => `<option value="${esc(g.name)}">${esc(g.name.replace('Treasury ', ''))} · price ${g.price.toFixed(2)} · yield ${pc(g.quotedYield, 2)}</option>`).join('');
+    $('g-gilt').value = keep && list.some((g) => g.name === prev) ? prev : G_DEFAULT[G.mode];
+    $('g-asof').textContent = new Date(E.GILT_PRICES_AS_OF).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    fillHorizon();
+  }
+  function fillHorizon() {
+    const g = giltByName($('g-gilt').value), settle = E.settlementDate(new Date());
+    const opts = [];
+    for (let y = 1; ; y++) {
+      const t = new Date(settle); t.setUTCFullYear(t.getUTCFullYear() + y);
+      const iso = t.toISOString().slice(0, 10);
+      if (iso >= g.maturity) break;
+      opts.push([iso, `${y} year${y > 1 ? 's' : ''} (${fmtDate(iso, true)})`]);
+    }
+    opts.push([g.maturity, `Maturity (${fmtDate(g.maturity, true)})`]);
+    const prev = $('g-horizon').selectedIndex;
+    $('g-horizon').innerHTML = opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+    $('g-horizon').selectedIndex = prev >= 0 && prev < opts.length - 1 ? prev : Math.min(1, opts.length - 1);
+  }
+  function renderAmountChips() {
+    const a = num('g-amount');
+    $('g-amounts').innerHTML = G_AMOUNTS.map((v) => `<button type="button" data-a="${v}" aria-pressed="${a === v}">${gbpk(v)}</button>`).join('');
+    $('g-amounts').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { setVal('g-amount', b.dataset.a); renderGilts(); }));
+  }
+  function renderGilts() {
+    const g = giltByName($('g-gilt').value);
+    if (!g) return;
+    renderAmountChips();
+    const settle = E.settlementDate(new Date());
+    const amount = Math.max(1000, num('g-amount'));
+    const taxRate = parseFloat($('g-tax').value), other = num('g-other');
+    const h = E.giltHolding(g, amount, G.mode === 'growth' ? { settle, taxRate } : { settle, otherIncome: other });
+    const horizon = $('g-horizon').value;
+    const gain = h.nominal - amount;
+    const coupons = h.grossIncome;
+    const freeShare = Math.max(0, gain) / (Math.max(0, gain) + coupons || 1);
+    const thisYear = h.flows.filter((f) => f.taxYear === h.flows[0].taxYear);
+    const yearGross = thisYear.reduce((a, f) => a + f.gross, 0), yearTax = thisYear.reduce((a, f) => a + f.tax, 0);
+    const annualGross = h.nominal * g.coupon;
+
+    // headline and KPIs
+    let kpis;
+    if (G.mode === 'growth') {
+      const eq = taxRate > 0 ? h.netYield / (1 - taxRate) : h.netYield;
+      $('g-h').textContent = `${gbp(amount)} in ${g.name} grows to ${gbp(h.nominal)} by ${fmtDate(g.maturity, true)}, and ${pc(freeShare, 0)} of what it makes is a tax-free gain. After ${pc(taxRate, 0)} tax it yields ${pc(h.netYield, 2)} a year, like a savings account paying ${pc(eq, 2)}.`;
+      $('g-sub').textContent = `Buying at ${g.price.toFixed(2)} (plus ${h.accrued.toFixed(3)} accrued interest) for settlement ${fmtDate(h.settle, true)}. The small coupon is taxed as savings income; the rise to 100 at maturity is free of Capital Gains Tax.`;
+      kpis = [
+        ['You hold', gbp(h.nominal), 'nominal, repaid at 100'],
+        ['Every 6 months', `${gbp(h.couponEvery6Months)}`, `${gbp(h.flows[0]?.net)} after tax`],
+        ['Tax-free gain', gbp(gain), `by ${fmtDate(g.maturity, true)}`],
+        ['Yield before tax', pc(h.yield, 2), `duration ${h.duration.toFixed(1)} years`],
+        ['After tax', pc(h.netYield, 2), taxRate > 0 ? `savings rate to match ${pc(eq, 2)}` : 'no tax at 0%'],
+      ];
+    } else {
+      const room = E.savingsAllowance(other), next = E.savingsAllowance(other * 1.025);
+      const plan = E.incomePlan(g, other, settle);
+      $('g-h').textContent = `With ${gbp(other)} of other income you can take ${gbp(room.total)} of interest a year tax-free. ${gbp(plan.cost)} in ${g.name} pays about ${gbp(plan.every6Months)} every six months and stays inside it.`;
+      $('g-sub').textContent = `At ${gbp(amount)} the holding pays ${gbp(annualGross)} a year${annualGross > room.total ? `, ${gbp(annualGross - room.total)} more than the tax-free room, so some of it is taxed` : `, ${gbp(room.total - annualGross)} below the tax-free room`}. Capital comes back at 100 on ${fmtDate(g.maturity, true)}${g.price > 100 ? ', below what you pay, and that loss cannot be set against other gains' : ''}.`;
+      $('g-allow').innerHTML = `<div class="strip">${[
+        ['Unused personal allowance', gbp(room.unusedPA), `£12,570 less your other income`],
+        ['Starting rate for savings', gbp(room.startingRate), '0% band, shrinks as other income passes £12,570'],
+        ['Personal savings allowance', gbp(room.psa), `${room.band} rate taxpayer`],
+        ['Tax-free interest this year', gbp(room.total), `next year about ${gbp(next.total)} as State Pension rises`],
+      ].map(([l, v, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${v}</span><span class="sub">${sub}</span></div>`).join('')}</div>
+      <div class="controls" style="margin-top:10px"><button class="btn" type="button" id="g-fill">Invest ${gbp(plan.cost)} to fill the allowance</button><span class="subtitle">Uses ${gbp(plan.nominal)} nominal of ${esc(g.name)}.</span></div>`;
+      $('g-fill').addEventListener('click', () => { setVal('g-amount', Math.round(plan.cost / 100) * 100); renderGilts(); });
+      kpis = [
+        ['Every 6 months', gbp(h.couponEvery6Months), 'gross interest'],
+        ['This tax year', gbp(yearGross), yearTax > 1 ? `${gbp(yearTax)} tax` : 'all tax-free'],
+        ['Each year', gbp(annualGross), `${pc(g.coupon, 3)} coupon`],
+        ['Capital back', gbp(h.nominal), fmtDate(g.maturity, true)],
+        [gain >= 0 ? 'Gain at maturity' : 'Loss at maturity', gbp(Math.abs(gain)), `bought at ${g.price.toFixed(2)}`],
+      ];
+    }
+    $('g-kpis').innerHTML = kpis.map(([l, v, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${v}</span><span class="sub">${sub}</span></div>`).join('');
+
+    // value paths under yield moves
+    const shown = [...new Set([-100, -50, 0, 50, 100, G.shift])].sort((a, b) => a - b);
+    const a = css('--accent-ink'), amber = css('--amber'), grey = css('--grey');
+    const paths = shown.map((bp) => ({ bp, path: E.valuePath(h, bp, { points: 40 }) }));
+    const labels = paths[0].path.map((p) => fmtDate(p.date));
+    const ds = paths.map(({ bp, path }) => ({
+      label: bpLabel(bp), data: path.map((p) => p.value),
+      borderColor: bp === 0 ? a : rgba(bp > 0 ? amber : grey, 0.35 + Math.min(1, Math.abs(bp) / 200) * 0.6),
+      borderWidth: bp === G.shift ? 2.6 : bp === 0 ? 2 : 1.2, borderDash: bp === 0 || bp === G.shift ? [] : [4, 3], pointRadius: 0, fill: false,
+    }));
+    ds.push({ label: 'You paid', data: labels.map(() => amount), borderColor: css('--ink-3'), borderDash: [2, 4], borderWidth: 1, pointRadius: 0, fill: false });
+    const o = baseOptions({ xTitle: '', yTitle: 'Capital value' });
+    o.scales.y.beginAtZero = false;
+    o.plugins.tooltip.callbacks = { title: (it) => it[0].label, label: (c) => `${c.dataset.label}  ${gbp(c.parsed.y)}` };
+    chart('ch-gvalue', { type: 'line', data: { labels, datasets: ds }, options: o });
+    $('g-key1').innerHTML = `<span><i style="background:${a};height:2px"></i>yields unchanged</span><span><i style="background:${amber};height:2px"></i>yields higher</span><span><i style="background:${grey};height:2px"></i>yields lower</span><span>All paths end at ${gbp(h.nominal)}: held to maturity, rate moves wash out.</span>`;
+
+    // cash every six months
+    const fl = h.flows;
+    const o2 = baseOptions({ xTitle: '', legend: false });
+    o2.scales.x.stacked = true; o2.scales.y.stacked = true;
+    if (Math.max(...fl.map((f) => f.gross)) < 5000) o2.scales.y.ticks.callback = (v) => gbp(v);
+    o2.plugins.tooltip.callbacks = { title: (it) => fmtDate(fl[it[0].dataIndex].date, true), label: (c) => `${c.dataset.label}  ${gbp(c.parsed.y)}` };
+    chart('ch-gcash', { type: 'bar', data: { labels: fl.map((f) => fmtDate(f.date)), datasets: [
+      { label: 'After tax', data: fl.map((f) => f.net), backgroundColor: a, borderRadius: 2 },
+      { label: 'Tax', data: fl.map((f) => f.tax), backgroundColor: rgba(grey, 0.5), borderRadius: 2 },
+    ] }, options: o2 });
+    $('g-key2').innerHTML = `<span><i style="background:${a}"></i>interest after tax</span><span><i style="background:${rgba(grey, 0.5)}"></i>tax</span><span>${fl.length} payments, then ${gbp(h.nominal)} back</span>`;
+
+    // yield moves
+    $('g-shift').innerHTML = G_SHIFTS.map((bp) => `<button type="button" data-bp="${bp}" aria-pressed="${G.shift === bp}">${bpLabel(bp)}</button>`).join('');
+    $('g-shift').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { G.shift = +b.dataset.bp; renderGilts(); }));
+    const sc = E.rateScenarios(h, horizon, G_SHIFTS);
+    const hz = fmtDate(horizon, true);
+    $('tbl-gscen').innerHTML = `<thead><tr><th>Yields move</th><th>New yield</th><th>Value straight after</th><th>Capital on ${hz}</th><th>Interest by then, after tax</th><th>Total</th><th>Return a year</th></tr></thead><tbody>${sc.map((r) => `<tr class="${r.bp === G.shift ? 'hit' : ''}"><td>${bpLabel(r.bp)}</td><td>${pc(r.yield, 2)}</td><td>${gbp(r.valueNow)} <span class="gloss" style="display:inline">${Math.abs(r.changeNow) < 0.5 ? '±£0' : (r.changeNow > 0 ? '+' : '−') + gbp(Math.abs(r.changeNow))}</span></td><td>${gbp(r.capital)}</td><td>${gbp(r.income)}</td><td><b>${gbp(r.total)}</b></td><td>${pc(r.annualised, 2)}</td></tr>`).join('')}</tbody>`;
+
+    // schedule
+    let cum = 0;
+    $('g-sched-sum').textContent = `Every payment, date by date (${fl.length} coupons and the redemption)`;
+    $('tbl-gsched').innerHTML = `<thead><tr><th>Date</th><th>Tax year</th><th>Interest</th><th>Tax</th><th>After tax</th><th>Capital back</th><th>Received so far</th></tr></thead><tbody>${fl.map((f) => { cum += f.net + f.redemption; return `<tr><td>${fmtDate(f.date, true)}</td><td>${f.taxYear}</td><td>${gbp(f.gross)}</td><td>${gbp(f.tax)}</td><td>${gbp(f.net)}</td><td>${f.redemption ? gbp(f.redemption) : ''}</td><td>${gbp(cum)}</td></tr>`; }).join('')}</tbody>`;
+  }
+  document.querySelectorAll('#g-mode button').forEach((b) => b.addEventListener('click', () => { G.mode = b.dataset.mode; G.shift = 0; if (G.mode === 'income') setVal('g-amount', 100000); setupGilts(false); renderGilts(); }));
+  ['g-amount', 'g-other'].forEach((id) => $(id).addEventListener('input', () => { clearTimeout(G.t); G.t = setTimeout(renderGilts, 250); }));
+  $('g-tax').addEventListener('change', renderGilts);
+  $('g-horizon').addEventListener('change', renderGilts);
+  $('g-gilt').addEventListener('change', () => { fillHorizon(); renderGilts(); });
+
+  // ---------- toolbar ----------
+  document.querySelectorAll('.links a[data-tab]').forEach((a) => a.addEventListener('click', () => openTab(a.dataset.tab)));
+  const navLinks = [...document.querySelectorAll('.links a[href^="#"]')];
+  try {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) {
+        const id = '#' + e.target.id;
+        navLinks.forEach((a) => a.setAttribute('aria-current', String(a.getAttribute('href') === id && (!a.dataset.tab || a.dataset.tab === state.tab))));
+      }
+    }, { rootMargin: '-80px 0px -60% 0px' });
+    ['sec-board', 'sec-outcomes', 'sec-backtest', 'sec-pots', 'sec-gilts', 'sec-detail'].forEach((id) => $(id) && io.observe($(id)));
+  } catch (e) { /* no observer: links still work */ }
+
   // ---------- wiring ----------
   let timer = null;
   document.querySelectorAll('#yours input, #yours select').forEach((el) => el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', () => {
@@ -496,13 +644,14 @@
   $('bt-measure').addEventListener('change', () => last && renderBacktest());
   $('smax-rate').addEventListener('input', () => last && renderSafeMax());
   $('infl').addEventListener('input', () => last && renderInflation());
-  $('gilt-rate').addEventListener('change', renderGilts);
-  const rerender = () => { renderMarket(); if (last) { renderBoard(); renderFan(); renderBacktest(); renderSafeMax(); renderTab(); } };
+  const rerender = () => { renderMarket(); renderGilts(); if (last) { renderBoard(); renderFan(); renderBacktest(); renderSafeMax(); renderTab(); } };
   try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', rerender); } catch (e) { /* old browsers */ }
   new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-  openTab(state.tab || 'annuities');
+  openTab(['annuities', 'inflation', 'longevity', 'all', 'method'].includes(state.tab) ? state.tab : 'annuities');
   renderMarket();
   renderPickers();
+  setupGilts(false);
+  renderGilts();
   run();
 })();

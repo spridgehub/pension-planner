@@ -112,3 +112,34 @@ test('live basis moves annuity rates with gilt yields', () => {
   const spec = { escalation: { kind: 'level' } };
   assert.ok(E.annuityIncome(100000, spec, { age: 65 }, E.liveBasis(E.MARKET_BASIS, now)) > E.annuityIncome(100000, spec, { age: 65 }, E.liveBasis()));
 });
+
+test('gilt pricing reproduces quoted yields from clean prices', () => {
+  const settle = E.settlementDate(new Date('2026-10-24T20:00:00Z'));
+  for (const g of E.GILTS.filter((x) => x.maturity > '2027-06-01')) {
+    assert.ok(Math.abs(E.yieldFromClean(g, g.price, settle) - g.quotedYield) < 0.0006, `${g.name}`);
+  }
+});
+
+test('gilt holding: semi-annual coupons, pull to par, rate moves wash out at maturity', () => {
+  const settle = E.settlementDate(new Date('2026-10-24T20:00:00Z'));
+  const g = E.GILTS.find((x) => x.ticker === 'TG30');
+  const h = E.giltHolding(g, 50000, { settle, taxRate: 0.4 });
+  close(h.couponEvery6Months, h.nominal * g.coupon / 2, 1e-12);
+  assert.equal(h.flows.length, 8);
+  close(h.flows[0].net, h.flows[0].gross * 0.6, 1e-9);
+  for (const bp of [-100, 0, 100]) close(E.valuePath(h, bp).at(-1).value, h.nominal, 1e-9);
+  const [down, flat, up] = E.rateScenarios(h, '2028-10-26', [-50, 0, 50]);
+  assert.ok(down.valueNow > flat.valueNow && flat.valueNow > up.valueNow);
+  assert.ok(h.netYield > 0.04 && h.netYield < h.yield);
+});
+
+test('pensioner savings room: unused allowance + starting rate + PSA', () => {
+  const r = E.savingsAllowance(12548);
+  assert.deepEqual([Math.round(r.unusedPA), r.startingRate, r.psa, Math.round(r.total)], [22, 5000, 1000, 6022]);
+  assert.equal(E.savingsAllowance(14570).startingRate, 3000);
+  const g = E.GILTS.find((x) => x.ticker === 'TS29');
+  const plan = E.incomePlan(g, 12548);
+  close(plan.nominal * g.coupon, plan.total, 1e-9);
+  assert.ok(E.taxOnInterest(plan.total, 12548) < 0.01);
+  close(E.taxOnInterest(plan.total + 1000, 12548), 200, 1e-6);
+});

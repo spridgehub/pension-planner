@@ -1,0 +1,5 @@
+REPO=spridgehub/pension-planner
+BUILD="npm run build:web"
+BRANCH=main
+PAGES=/docs
+SITE=https://spridgehub.github.io/pension-planner/
