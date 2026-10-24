@@ -1,0 +1,20 @@
+{
+  "asOf": "2026-10-22",
+  "source": "Hargreaves Lansdown annuity best buy rates, 22 October 2026 (hl.co.uk/retirement/annuities/best-buy-rates)",
+  "nominalYield": 0.062077131639954555,
+  "cpiPriced": 0.03406344682337555,
+  "mortalityMultiplier": 0.644319781774199,
+  "longTermImprovement": 0.015,
+  "startYear": 2026,
+  "expenseLoad": 0,
+  "enhancedSmokerMultiplier": 1.489,
+  "fit": {
+    "rmsRelativeError": 0.0109,
+    "maxAbsRelativeError": 0.0239
+  },
+  "curveAtCalibration": {
+    "date": "2026-10-21",
+    "gilt20": 0.058388,
+    "implied20": 0.033668
+  }
+}

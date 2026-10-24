@@ -1,0 +1,16 @@
+{
+  "name": "retirement-engine",
+  "version": "0.1.0",
+  "description": "UK retirement income engine: annuity pricing (single/joint, guarantees, value protection, escalation), inflation, drawdown and blended strategies with Monte Carlo simulation.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test test/",
+    "calibrate": "node scripts/calibrate.js",
+    "cli": "node cli.js",
+    "build:web": "node scripts/build-web.js",
+    "refresh": "node scripts/fetch-market.js && node scripts/build-web.js"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

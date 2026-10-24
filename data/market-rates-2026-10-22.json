@@ -1,0 +1,15 @@
+{
+  "source": "Hargreaves Lansdown annuity best buy rates, 22 October 2026 (hl.co.uk/retirement/annuities/best-buy-rates)",
+  "notes": "Income a year from £100,000. Average postcode, monthly in advance. Joint life assumes spouse 3 years younger.",
+  "purchase": 100000,
+  "ages": [55, 60, 65, 70, 75],
+  "rows": [
+    { "spec": { "life": "single", "guaranteeYears": 0, "escalation": { "kind": "level" } }, "income": [7078, 7476, 8211, 9002, 10212] },
+    { "spec": { "life": "single", "guaranteeYears": 5, "escalation": { "kind": "level" } }, "income": [7070, 7461, 8146, 8886, 9950] },
+    { "spec": { "life": "single", "guaranteeYears": 5, "escalation": { "kind": "rpi" } }, "income": [4486, 4922, 5618, 6417, 7648] },
+    { "spec": { "life": "single", "guaranteeYears": 5, "escalation": { "kind": "fixed", "rate": 0.03 } }, "income": [4956, 5350, 6094, 6915, 8095] },
+    { "spec": { "life": "joint", "survivorPct": 0.5, "guaranteeYears": 0, "escalation": { "kind": "level" } }, "income": [6696, 7144, 7658, 8361, 9146] },
+    { "spec": { "life": "joint", "survivorPct": 0.5, "guaranteeYears": 0, "escalation": { "kind": "fixed", "rate": 0.03 } }, "income": [4595, 5034, 5609, 6312, 7266] }
+  ],
+  "enhanced": { "age": 65, "description": "Smoker, 10 a day for 20 years, 15 units a week", "spec": { "life": "single", "escalation": { "kind": "level" } }, "income": 8755 }
+}
