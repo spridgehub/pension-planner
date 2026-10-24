@@ -12,3 +12,12 @@ const html = readFileSync(root + 'web/app.html', 'utf8')
 mkdirSync(root + 'dist', { recursive: true });
 writeFileSync(root + 'dist/pension-planner.html', html);
 console.log(`dist/pension-planner.html ${(html.length / 1024).toFixed(0)} KB`);
+
+// GitHub Pages copy (served from /docs on main): the same page in a full document.
+mkdirSync(root + 'docs', { recursive: true });
+writeFileSync(root + 'docs/index.html', '<!doctype html><html lang="en-GB"><head><meta charset="utf-8">'
+  + '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+  + '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>'
+  + '</head><body>' + html + '</body></html>\n');
+writeFileSync(root + 'docs/.nojekyll', '');
+console.log('docs/index.html (GitHub Pages)');

@@ -12,7 +12,7 @@ export function conditions(year) {
 
 export const REGIMES = {
   all: { label: 'All of history', short: 'All years', test: () => true },
-  likeToday: { label: 'Starts like today: long gilt yields of 4.5%+ with inflation of 2–6%', short: 'Like today', test: (c) => c.longYield >= 0.045 && c.inflation >= 0.02 && c.inflation <= 0.06 },
+  likeToday: { label: 'Starts like today: long gilt yields of 4.5%+ with inflation of 2% to 6%', short: 'Like today', test: (c) => c.longYield >= 0.045 && c.inflation >= 0.02 && c.inflation <= 0.06 },
   highInflation: { label: 'High inflation: prices rising more than 6% a year', short: 'High inflation', test: (c) => c.inflation > 0.06 },
   lowRates: { label: 'Low rates: long gilt yields under 3%', short: 'Low rates', test: (c) => c.longYield != null && c.longYield < 0.03 },
 };

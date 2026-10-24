@@ -2,212 +2,201 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..750&family=Geist+Mono:wght@400..700&display=swap">
 <style>
-/* Layout: a market "ticker" band sets the scene; then pick a household, pick a future,
-   and watch seven strategies race side by side. Detail lives in deep dives at the end. */
+/* INLAP design language (f1-content/site/assets/brand.css), adapted for a retirement income desk
+   the way gilt-rv adapted it: carbon surfaces, borders-only depth, Geist with Geist Mono for every
+   number, blue as the one interface accent, green and red kept for meaning (within / breach).
+   Layout: sticky nav with the rising-bars mark; desk strip of market numbers; a dense strategy
+   board; panels on a 12-column grid, each led by a headline that states its finding. */
 :root {
-  --bg: #f2f5f6;
-  --surface: #ffffff;
-  --sunk: #e8edef;
-  --ink: #13212a;
-  --ink-2: #44555f;
-  --muted: #6b7b85;
-  --line: #d6dee2;
-  --accent: #0e6a5b;
-  --accent-ink: #ffffff;
-  --accent-soft: #dcefeb;
-  --band: #10242c;
-  --band-ink: #e9f3f2;
-  --band-muted: #9db5b6;
-  --band-line: #26414a;
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
-  --good: #0a8f0a; --warn: #a06d00; --crit: #c93535;
-  --crit-soft: #fbe3e3; --good-soft: #def3de; --warn-soft: #fbf0d6;
-  --f-display: "Literata", Georgia, "Times New Roman", serif;
-  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 10px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1418; --surface: #151d22; --sunk: #1b252b; --ink: #e6edf1; --ink-2: #aab8c1; --muted: #7f909a;
-    --line: #27343b; --accent: #43b8a2; --accent-ink: #06231d; --accent-soft: #163a34;
-    --band: #0a1a1f; --band-ink: #e6f1f0; --band-muted: #8aa6a8; --band-line: #1e353c;
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
-    --good: #2fbf2f; --warn: #e0a320; --crit: #e06060;
-    --crit-soft: #3a1f20; --good-soft: #17301a; --warn-soft: #35290f;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1418; --surface: #151d22; --sunk: #1b252b; --ink: #e6edf1; --ink-2: #aab8c1; --muted: #7f909a;
-  --line: #27343b; --accent: #43b8a2; --accent-ink: #06231d; --accent-soft: #163a34;
-  --band: #0a1a1f; --band-ink: #e6f1f0; --band-muted: #8aa6a8; --band-line: #1e353c;
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
-  --good: #2fbf2f; --warn: #e0a320; --crit: #e06060;
-  --crit-soft: #3a1f20; --good-soft: #17301a; --warn-soft: #35290f;
+  --font-ui: "Geist", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --page: #0b0b0d; --panel: #111115; --raised: #17171c; --inset: #08080a;
+  --rule: rgb(255 255 255 / .08); --rule-strong: rgb(255 255 255 / .14);
+  --ink-1: #f1f1f3; --ink-2: #c3c3cb; --ink-3: #8f8f99; --ink-4: #80808c;
+  --accent: #3671c6; --accent-ink: #6f9de0; --on-accent: #fbfbfc;
+  --amber: #e3a008; --grey: #7a7a86;
+  --good: #14a090; --bad: #e5484d; --caution: #ffd400;
+  --good-bg: rgb(20 160 144 / .14); --bad-bg: rgb(229 72 77 / .14); --caution-bg: rgb(255 212 0 / .12);
+  --r-control: 6px; --r-panel: 12px; --r-pill: 999px;
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
   color-scheme: dark;
 }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --page: #f3f3f4; --panel: #fafafb; --raised: #e9e9ec; --inset: #eeeef0;
+    --rule: rgb(17 17 20 / .10); --rule-strong: rgb(17 17 20 / .18);
+    --ink-1: #111114; --ink-2: #34343b; --ink-3: #5a5a63; --ink-4: #66666f;
+    --accent: #2f63b0; --accent-ink: #2f63b0; --amber: #a86f00; --grey: #8a8a94;
+    --good: #0d8a7a; --bad: #d13415; --caution: #8a6d00;
+    --good-bg: rgb(13 138 122 / .12); --bad-bg: rgb(209 52 21 / .10); --caution-bg: rgb(200 160 0 / .14);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --page: #f3f3f4; --panel: #fafafb; --raised: #e9e9ec; --inset: #eeeef0;
+  --rule: rgb(17 17 20 / .10); --rule-strong: rgb(17 17 20 / .18);
+  --ink-1: #111114; --ink-2: #34343b; --ink-3: #5a5a63; --ink-4: #66666f;
+  --accent: #2f63b0; --accent-ink: #2f63b0; --amber: #a86f00; --grey: #8a8a94;
+  --good: #0d8a7a; --bad: #d13415; --caution: #8a6d00;
+  --good-bg: rgb(13 138 122 / .12); --bad-bg: rgb(209 52 21 / .10); --caution-bg: rgb(200 160 0 / .14);
+  color-scheme: light;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums; }
-.inner { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-h1, h2, h3 { font-family: var(--f-display); font-weight: 650; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
-h1 { font-size: clamp(2rem, 4.5vw, 3rem); line-height: 1.08; }
-h2 { font-size: clamp(1.35rem, 2.6vw, 1.75rem); line-height: 1.2; }
-h3 { font-size: 1.05rem; line-height: 1.3; }
-p { margin: 0; max-width: 70ch; }
-a { color: var(--accent); }
-.eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
-.small { font-size: 0.86rem; color: var(--ink-2); }
-.muted { color: var(--muted); }
-button { font: inherit; font-weight: 600; font-size: 0.88rem; border-radius: 7px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); padding: 7px 12px; cursor: pointer; }
-button.ghost { background: transparent; color: var(--accent); }
+body { background: var(--page); color: var(--ink-1); font: 400 14px/1.5 var(--font-ui); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--page); }
+.num, td, .val { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--accent-ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+* { scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
 
-/* Market band */
-.band { background: var(--band); color: var(--band-ink); padding-block: 30px 26px; }
-.band .inner { display: grid; gap: 20px; }
-.band .eyebrow { color: var(--band-muted); }
-.mast { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: end; }
-@media (max-width: 860px) { .mast { grid-template-columns: minmax(0, 1fr); } }
-.mast p { color: var(--band-muted); font-size: 1.02rem; }
-.mast p.verdict { font-family: var(--f-display); font-size: 1.15rem; line-height: 1.4; border-left: 3px solid var(--s3); padding-left: 14px; color: var(--band-ink); }
-.tickers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); column-gap: 18px; border-top: 1px solid var(--band-line); }
-.tick { padding: 14px 0 12px; display: grid; gap: 2px; border-bottom: 1px solid var(--band-line); min-width: 0; align-content: start; }
-.tick b { font-family: var(--f-display); font-size: 1.6rem; font-weight: 650; line-height: 1.1; }
-.tick .lbl { font-size: 0.78rem; color: var(--band-muted); font-weight: 600; }
-.tick .ctx { font-size: 0.78rem; color: var(--band-muted); }
-.tick svg { display: block; margin-top: 6px; width: 100%; height: 30px; }
+/* nav + wordmark */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--page) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.nav .wrap { height: 56px; display: flex; align-items: center; gap: 20px; }
+/* mark: five bars, each taller than the last like a pot compounding (after Pond Cottage's mark) */
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.mark { display: flex; gap: 2px; align-items: flex-end; height: 22px; }
+.mark i { display: block; width: 4px; border-radius: 2px; background: var(--accent-ink); }
+.mark i:nth-child(1) { height: 5px; opacity: .35; } .mark i:nth-child(2) { height: 7px; opacity: .5; } .mark i:nth-child(3) { height: 10px; opacity: .65; } .mark i:nth-child(4) { height: 15px; opacity: .82; } .mark i:nth-child(5) { height: 22px; }
+.name { font: 750 14px/1 var(--font-ui); letter-spacing: .07em; color: var(--ink-1); }
+.here { font: 500 13px/1 var(--font-ui); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.asof { margin-left: auto; font: 500 12px/1 var(--font-num); color: var(--ink-4); white-space: nowrap; }
+@media (max-width: 640px) { .here { display: none; } }
 
-main { display: grid; gap: 38px; padding-block: 30px 70px; }
-.sec { display: grid; gap: 16px; min-width: 0; }
-.sec-head { display: grid; gap: 6px; }
+main.wrap { display: grid; gap: 16px; padding-block: 18px 40px; }
 
-/* Personas */
-.personas { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-.persona { text-align: left; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 4px; align-content: start; font-weight: 400; }
-.persona:hover { border-color: var(--accent); }
-.persona[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
-.persona strong { font-family: var(--f-display); font-size: 1.08rem; }
-.persona .pot { font-family: var(--f-display); font-size: 1.5rem; font-weight: 650; color: var(--accent); }
-.persona span { font-size: 0.84rem; color: var(--ink-2); }
+/* desk strip */
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border: 1px solid var(--rule); border-radius: var(--r-panel); background: var(--panel); overflow: hidden; }
+.cell { padding: 12px 14px 10px; display: grid; gap: 2px; align-content: start; box-shadow: 1px 0 0 var(--rule), 0 1px 0 var(--rule); min-width: 0; }
+.lbl { font: 600 11px/1.3 var(--font-ui); text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); }
+.val { font-size: 22px; font-weight: 600; line-height: 1.15; }
+.sub { font-size: 12px; color: var(--ink-3); }
+.cell svg { width: 100%; height: 26px; display: block; margin-top: 4px; }
+.verdict { font: 600 16px/1.45 var(--font-ui); max-width: 95ch; }
+.verdict small { display: block; font: 400 12px/1.5 var(--font-ui); color: var(--ink-3); margin-top: 2px; }
 
-.controls { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: end; }
-.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface); }
-.seg button { background: transparent; color: var(--ink-2); border: 0; border-radius: 0; border-right: 1px solid var(--line); padding: 8px 12px; font-weight: 600; }
-.seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-.seg .today { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; margin-left: 6px; padding: 1px 5px; border-radius: 4px; border: 1px solid currentColor; }
-.ctl { display: grid; gap: 5px; }
-.ctl > span { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+/* panels */
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r-panel); padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.grid > .panel { grid-column: span 12; align-self: start; }
+@media (min-width: 1040px) { .grid > .s7 { grid-column: span 7; } .grid > .s5 { grid-column: span 5; } .grid > .s6 { grid-column: span 6; } }
+.section-lbl { font: 700 12px/1.3 var(--font-ui); text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); }
+.section-lbl span { text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 6px; }
+.headline { font: 700 16px/1.35 var(--font-ui); }
+.subtitle { font-size: 12px; color: var(--ink-3); max-width: 90ch; }
+.chart { position: relative; height: 300px; min-width: 0; }
+.chart.sm { height: 230px; }
+.key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--ink-3); }
+.key i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
 
-/* Make it yours */
-details.yours { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; }
-details.yours summary { cursor: pointer; font-weight: 600; }
-.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
-label.f { display: grid; gap: 3px; font-size: 0.8rem; color: var(--ink-2); font-weight: 500; min-width: 0; }
-input, select, textarea { font: inherit; font-size: 0.92rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; min-width: 0; }
-textarea { min-height: 80px; resize: vertical; }
-.check { display: flex; gap: 8px; align-items: center; font-size: 0.88rem; font-weight: 500; }
-.check input { width: auto; }
+/* controls */
+.controls { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: end; }
+.ctl { display: grid; gap: 6px; min-width: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.seg button, .chip { font: 500 13px/1 var(--font-ui); color: var(--ink-2); background: var(--inset); border: 1px solid var(--rule); border-radius: var(--r-pill); padding: 8px 12px; cursor: pointer; transition: background-color .15s var(--ease-out), border-color .15s var(--ease-out); }
+.seg button:hover { border-color: var(--rule-strong); color: var(--ink-1); }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.seg button .tag { font: 600 10px/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; margin-left: 6px; opacity: .85; }
+.seg button .num { margin-left: 6px; color: inherit; opacity: .75; }
+details.yours > summary { cursor: pointer; font: 500 13px/1 var(--font-ui); color: var(--accent-ink); list-style: none; padding: 6px 0; }
+details.yours > summary::-webkit-details-marker { display: none; }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px; }
+label.f { display: grid; gap: 4px; font: 500 11px/1.3 var(--font-ui); color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; min-width: 0; }
+input, select, textarea { font: 400 14px/1.3 var(--font-ui); color: var(--ink-1); background: var(--inset); border: 1px solid var(--rule-strong); border-radius: var(--r-control); padding: 7px 9px; width: 100%; min-width: 0; text-transform: none; letter-spacing: 0; }
+input[type=number] { font-family: var(--font-num); }
+input[type=range] { padding: 0; accent-color: var(--accent); }
+textarea { min-height: 70px; resize: vertical; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.check input { width: auto; accent-color: var(--accent); }
+.btn { font: 600 13px/1 var(--font-ui); border-radius: var(--r-pill); padding: 9px 14px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent-ink); border-color: var(--rule-strong); }
+.btn:active, .seg button:active { transform: scale(.97); }
 
-/* Strategy race */
-.race { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
-.runner { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 14px 12px; display: grid; gap: 8px; align-content: start; cursor: pointer; min-width: 0; }
-.runner:hover { border-color: var(--accent); }
-.runner[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.runner h3 { font-size: 1.02rem; }
-.runner .tag { font-size: 0.82rem; color: var(--ink-2); min-height: 2.5em; }
-.mini { position: relative; height: 130px; }
-.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.trio div { display: grid; }
-.trio b { font-family: var(--f-display); font-size: 1.08rem; }
-.trio span { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-.pills { display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: var(--sunk); color: var(--ink-2); }
-.pill.dot::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.pill.good { color: var(--good); background: var(--good-soft); }
-.pill.warn { color: var(--warn); background: var(--warn-soft); }
-.pill.crit { color: var(--crit); background: var(--crit-soft); }
-.legend-line { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-2); }
-.legend-line i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-
-/* Insights */
-.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
-.idea { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 8px; align-content: start; }
-.idea .kicker { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); font-weight: 700; }
-.idea h3 { font-size: 1.08rem; line-height: 1.35; }
-.idea p { font-size: 0.88rem; color: var(--ink-2); }
-.idea button { justify-self: start; margin-top: 4px; }
-
-/* Tables */
-.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
-th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle; }
-th:first-child, td:first-child { text-align: left; white-space: normal; min-width: 190px; }
-thead th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--sunk); }
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; vertical-align: middle; }
+th:first-child, td:first-child { text-align: left; white-space: normal; font-family: var(--font-ui); min-width: 200px; }
+thead th { font: 600 11px/1.3 var(--font-ui); text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); background: var(--inset); }
 tbody tr:last-child td { border-bottom: 0; }
-tr.group td { background: var(--sunk); font-weight: 600; font-size: 0.78rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
-td.cell { min-width: 108px; }
-td.cell b { display: block; font-size: 0.95rem; }
-td.cell span { font-size: 0.74rem; color: var(--muted); }
+td .name { font-weight: 600; color: var(--ink-1); }
+td .gloss { display: block; font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+tr.pick { cursor: pointer; transition: background-color .15s var(--ease-out); }
+tr.pick:hover td { background: var(--raised); }
+tr.pick[aria-selected="true"] td { background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+tr.pick[aria-selected="true"] td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+tr.group td { background: var(--inset); font: 600 11px/1.3 var(--font-ui); text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); }
+td.cell2 b { display: block; font-weight: 600; }
+td.cell2 span { font-size: 11px; color: var(--ink-3); }
+.pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--font-num); border-radius: var(--r-pill); padding: 4px 8px; background: var(--raised); color: var(--ink-2); }
+.pill.good { color: var(--good); background: var(--good-bg); }
+.pill.caution { color: var(--caution); background: var(--caution-bg); }
+.pill.bad { color: var(--bad); background: var(--bad-bg); }
 
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; min-width: 0; }
-.figs { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.fig { flex: 1 1 150px; padding: 12px 14px; display: grid; gap: 2px; align-content: start; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-.fig b { font-family: var(--f-display); font-size: 1.3rem; }
-.fig span { font-size: 0.78rem; color: var(--muted); }
-.chart { position: relative; height: 320px; min-width: 0; }
-.chart.short { height: 240px; }
-.ctrl { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
-.ctrl label.f { min-width: 180px; }
-.ctrl input[type=range] { padding: 0; }
+/* notes (insights) */
+.notes { display: grid; gap: 0; }
+.note { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.note:first-child { padding-top: 0; }
+.note:last-child { border-bottom: 0; padding-bottom: 0; }
+.note .lbl { color: var(--accent-ink); }
+.note h3 { font: 600 14px/1.4 var(--font-ui); }
+.note p { font-size: 12.5px; color: var(--ink-3); max-width: 80ch; }
+.note button { justify-self: start; font: 600 12px/1 var(--font-ui); color: var(--accent-ink); background: none; border: 1px solid var(--rule-strong); border-radius: var(--r-pill); padding: 6px 10px; cursor: pointer; margin-top: 2px; }
+.note button:hover { border-color: var(--accent); }
 
-/* Deep dives */
-.dives { display: grid; gap: 10px; }
-details.dive { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 18px; }
-details.dive > summary { cursor: pointer; font-family: var(--f-display); font-weight: 650; font-size: 1.08rem; }
-details.dive > summary span { font-family: var(--f-body); font-weight: 400; font-size: 0.86rem; color: var(--muted); margin-left: 8px; }
-details.dive > div { display: grid; gap: 14px; margin-top: 14px; }
-.callout { background: var(--sunk); border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; color: var(--ink-2); display: grid; gap: 6px; }
-.callout strong { color: var(--ink); }
-.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-.cols > * { min-width: 0; }
-ul.sources { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.86rem; color: var(--ink-2); }
-.notice { font-size: 0.85rem; color: var(--ink-2); border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; }
-.status { font-size: 0.8rem; color: var(--muted); min-height: 1.2em; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* figures inside panels */
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.figs .cell .val { font-size: 18px; }
+
+/* tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+.tabs button { font: 500 13px/1 var(--font-ui); color: var(--ink-3); background: none; border: 0; border-radius: var(--r-pill); padding: 8px 12px; cursor: pointer; }
+.tabs button:hover { color: var(--ink-1); background: var(--raised); }
+.tabs button[aria-selected="true"] { color: var(--ink-1); background: var(--raised); box-shadow: inset 0 -2px 0 var(--accent); }
+.tabpanel { display: grid; gap: 12px; min-width: 0; }
+.callouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.callout { background: var(--inset); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; font-size: 12.5px; color: var(--ink-3); display: grid; gap: 4px; }
+.callout strong { color: var(--ink-1); font-size: 13px; }
+ul.src { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12.5px; color: var(--ink-3); }
+
+.foot { border-top: 1px solid var(--rule); color: var(--ink-4); font-size: 12.5px; }
+.foot .wrap { padding-block: 22px 40px; display: grid; gap: 6px; }
+.foot p { max-width: 90ch; }
+.foot a { color: var(--ink-3); }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.status { font: 400 12px/1.3 var(--font-num); color: var(--ink-4); min-height: 1.3em; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 </style>
 
-<div class="band">
-  <div class="inner">
-    <div class="mast">
-      <div style="display:grid;gap:10px">
-        <span class="eyebrow">UK pensions · market data <span id="asof"></span></span>
-        <h1>Pension Planner</h1>
-        <p>Pick a household, pick a future, and see how seven ways of turning a pension into income would have played out over 125 years of UK markets.</p>
-      </div>
-      <p class="verdict" id="verdict"></p>
-    </div>
-    <div class="tickers" id="tickers"></div>
+<header class="nav">
+  <div class="wrap">
+    <span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="name">PENSION PLANNER</span></span>
+    <span class="here" id="here">UK retirement income desk</span>
+    <span class="asof" id="asof"></span>
   </div>
-</div>
+</header>
 
-<div class="inner">
-<main>
-  <section class="sec" id="start">
-    <div class="sec-head"><span class="eyebrow">Choose a starting point</span><h2>Whose retirement are we planning?</h2></div>
-    <div class="personas" id="personas"></div>
+<main class="wrap">
+  <section class="strip" id="tickers" aria-label="Market today"></section>
+  <p class="verdict" id="verdict"></p>
+
+  <section class="panel" aria-label="Household and futures">
     <div class="controls">
-      <div class="ctl"><span>Pension pot</span><div class="seg" id="pots"></div></div>
-      <div class="ctl"><span>Futures drawn from</span><div class="seg" id="regimes"></div></div>
+      <div class="ctl"><span class="lbl">Household</span><div class="seg" id="personas"></div></div>
+      <div class="ctl"><span class="lbl">Pension pot</span><div class="seg" id="pots"></div></div>
+      <div class="ctl"><span class="lbl">Futures drawn from</span><div class="seg" id="regimes"></div></div>
     </div>
-    <p class="small" id="regime-note"></p>
+    <p class="subtitle" id="regime-note"></p>
     <details class="yours" id="yours">
-      <summary>Make it yours: change ages, State Pension, savings, spending and charges</summary>
+      <summary>Make it yours: ages, State Pension, savings, spending, charges</summary>
       <div class="form">
         <label class="f">Your age <input id="p-age" type="number" min="50" max="85"></label>
-        <label class="f">Sex (for life expectancy) <select id="p-sex"><option value="male">Male</option><option value="female">Female</option></select></label>
+        <label class="f">Sex (life expectancy) <select id="p-sex"><option value="male">Male</option><option value="female">Female</option></select></label>
         <label class="f">Health <select id="p-health"></select></label>
         <label class="f">State Pension £/week <input id="p-sp" type="number" step="0.01"></label>
         <label class="f">State Pension age <input id="p-spa" type="number" min="60" max="70"></label>
@@ -215,98 +204,121 @@ ul.sources { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 
         <label class="f partner">Partner's age <input id="q-age" type="number" min="45" max="85"></label>
         <label class="f partner">Partner's sex <select id="q-sex"><option value="female">Female</option><option value="male">Male</option></select></label>
         <label class="f partner">Partner's health <select id="q-health"></select></label>
-        <label class="f partner">Partner's State Pension £/week <input id="q-sp" type="number" step="0.01"></label>
-        <label class="f partner">Partner's State Pension age <input id="q-spa" type="number" min="60" max="70"></label>
+        <label class="f partner">Partner's SP £/week <input id="q-sp" type="number" step="0.01"></label>
+        <label class="f partner">Partner's SP age <input id="q-spa" type="number" min="60" max="70"></label>
         <label class="f">Pension pot £ <input id="pot" type="number" step="1000"></label>
         <label class="f">ISA / savings £ <input id="savings" type="number" step="1000"></label>
         <label class="f">Tax-free cash <select id="tfc"><option value="0.25">Take 25%, keep invested</option><option value="0">Don't take</option></select></label>
         <label class="f">Other guaranteed income £/yr <input id="db" type="number" step="100"></label>
-        <label class="f">Essential spending £/yr after tax <input id="essential" type="number" step="500"></label>
+        <label class="f">Essential spending £/yr <input id="essential" type="number" step="500"></label>
         <label class="f">Drawdown charges %/yr <input id="fee" type="number" step="0.05"></label>
-        <label class="f">Future equity returns vs history <select id="eqadj"><option value="0">Same as history</option><option value="-0.01">1% a year lower</option><option value="-0.02">2% a year lower</option></select></label>
-        <label class="f">State Pension increases <select id="sppol"><option value="tripleLock">Triple lock</option><option value="cpi">Prices only</option></select></label>
-        <label class="f">Plan to age (backtests) <select id="toage"><option>95</option><option>100</option></select></label>
+        <label class="f">Equity returns vs history <select id="eqadj"><option value="0">Same as history</option><option value="-0.01">1% a year lower</option><option value="-0.02">2% a year lower</option></select></label>
+        <label class="f">State Pension rises <select id="sppol"><option value="tripleLock">Triple lock</option><option value="cpi">Prices only</option></select></label>
+        <label class="f">Plan to age <select id="toage"><option>95</option><option>100</option></select></label>
       </div>
     </details>
   </section>
 
-  <section class="sec" id="race-sec">
-    <div class="sec-head">
-      <span class="eyebrow">The race</span>
-      <h2 id="race-title">Seven strategies, one pot, two thousand futures</h2>
-      <p class="small">Each chart shows net household income after tax in today's money, from now to age 100, on the same scale. The band holds 8 in 10 futures. <b>Prudent</b> is the 1-in-10 bad outcome, <b>likely</b> the middle and <b>upside</b> the 1-in-10 good outcome, all at age <span class="ref-age">85</span>.</p>
-    </div>
-    <div class="legend-line" id="race-key"></div>
-    <div class="race" id="race"></div>
-    <p class="status" id="status" role="status" aria-live="polite"></p>
-  </section>
+  <div class="grid">
+    <section class="panel" aria-labelledby="board-h">
+      <span class="section-lbl">Strategy board<span>net household income after tax, today's money, age <span class="ref-age">85</span></span></span>
+      <h2 class="headline" id="board-h"></h2>
+      <p class="subtitle" id="board-sub"></p>
+      <div class="tbl"><table id="board"></table></div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
 
-  <section class="sec" id="ideas-sec">
-    <div class="sec-head"><span class="eyebrow">Things worth thinking about</span><h2>Small changes, big differences</h2></div>
-    <div class="ideas" id="ideas"></div>
-  </section>
+    <section class="panel s7" aria-labelledby="fan-h">
+      <span class="section-lbl">Range of outcomes<span>2,000 futures</span></span>
+      <h2 class="headline" id="fan-h"></h2>
+      <div class="key" id="fan-key"></div>
+      <div class="chart"><canvas id="ch-fan" aria-label="Range of income by age for the selected strategy"></canvas></div>
+      <p class="subtitle" id="fan-sub"></p>
+    </section>
 
-  <section class="sec" id="matrix-sec">
-    <div class="sec-head"><span class="eyebrow">Bigger or smaller pot</span><h2>What each pot size buys, strategy by strategy</h2><p class="small" id="matrix-note"></p></div>
-    <div class="tbl-wrap"><table id="tbl-matrix"></table></div>
-  </section>
+    <section class="panel s5" aria-labelledby="notes-h">
+      <span class="section-lbl">Notes<span>what if you changed one thing</span></span>
+      <h2 class="headline sr-only" id="notes-h">Notes</h2>
+      <div class="notes" id="ideas"></div>
+    </section>
 
-  <section class="sec" id="history">
-    <div class="sec-head"><span class="eyebrow">A century of backtests</span><h2 id="bt-title">Every retirement since 1900</h2><p class="small">One plan, replayed from every start year with real UK returns and inflation, everyone living to the planning age. Lines in the chosen kind of start are highlighted; red ones ran out of money.</p></div>
-    <div class="panel">
-      <div class="ctrl">
-        <label class="f">Strategy <select id="bt-option"></select></label>
-        <label class="f">Show <select id="bt-measure"><option value="income">Income</option><option value="pot">Money left invested</option></select></label>
+    <section class="panel s6" aria-labelledby="bt-h">
+      <span class="section-lbl">Backtest<span>every start year since 1900</span></span>
+      <h2 class="headline" id="bt-h"></h2>
+      <div class="controls">
+        <label class="f" style="min-width:200px">Strategy <select id="bt-option"></select></label>
+        <label class="f" style="min-width:160px">Show <select id="bt-measure"><option value="income">Income</option><option value="pot">Money left invested</option></select></label>
       </div>
-      <div class="figs" id="bt-figs"></div>
       <div class="chart"><canvas id="ch-backtest" aria-label="Income for every historical start year"></canvas></div>
-      <h3>How much could you have taken? The safe maximum by start year</h3>
-      <p class="small">The highest starting withdrawal, rising with prices, that would have lasted to the planning age (60/40 portfolio, after charges).</p>
-      <div class="ctrl"><label class="f">Compare with: <span id="smax-val">4.0%</span><input id="smax-rate" type="range" min="2" max="7" step="0.25" value="4"></label></div>
-      <div class="chart short"><canvas id="ch-safemax" aria-label="Safe maximum withdrawal rate by start year"></canvas></div>
-    </div>
-  </section>
+      <div class="figs" id="bt-figs"></div>
+    </section>
 
-  <section class="sec" id="dives">
-    <div class="sec-head"><span class="eyebrow">Deep dives</span><h2>The detail behind the numbers</h2></div>
-    <div class="dives">
-      <details class="dive" id="dive-annuities"><summary>Every annuity option<span>single, joint, guarantees, value protection, escalation</span></summary><div>
-        <div class="tbl-wrap"><table id="tbl-annuities"></table></div>
-        <div class="callout"><strong>Got a real quote?</strong><span>Run MoneyHelper's <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/taking-your-pension/compare-annuities" target="_blank" rel="noopener">Compare annuities</a> tool for this household, then enter the best quote. The model re-anchors to it, and everything on the page updates.</span>
-          <div class="form" style="margin-top:4px">
+    <section class="panel s6" aria-labelledby="sm-h">
+      <span class="section-lbl">Safe maximum<span>by start year, 60/40, after charges</span></span>
+      <h2 class="headline" id="sm-h"></h2>
+      <label class="f" style="max-width:320px">Compare with <span class="num" id="smax-val">4.0%</span><input id="smax-rate" type="range" min="2" max="7" step="0.25" value="4"></label>
+      <div class="chart"><canvas id="ch-safemax" aria-label="Safe maximum withdrawal rate by start year"></canvas></div>
+      <p class="subtitle">The highest starting withdrawal, rising with prices, that would have lasted to the planning age.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="mx-h">
+      <span class="section-lbl">Pot size<span>same people, same futures, only the pot changes</span></span>
+      <h2 class="headline" id="mx-h"></h2>
+      <p class="subtitle" id="matrix-note"></p>
+      <div class="tbl"><table id="tbl-matrix"></table></div>
+    </section>
+
+    <section class="panel" aria-label="Detail">
+      <div class="tabs" role="tablist" id="tabs">
+        <button type="button" role="tab" data-tab="annuities" aria-selected="true">Annuities</button>
+        <button type="button" role="tab" data-tab="inflation" aria-selected="false">Level or linked</button>
+        <button type="button" role="tab" data-tab="longevity" aria-selected="false">Life expectancy</button>
+        <button type="button" role="tab" data-tab="gilts" aria-selected="false">Gilts</button>
+        <button type="button" role="tab" data-tab="all" aria-selected="false">All options</button>
+        <button type="button" role="tab" data-tab="method" aria-selected="false">Method</button>
+      </div>
+      <div class="tabpanel" id="tab-annuities" role="tabpanel">
+        <h2 class="headline" id="ann-h"></h2>
+        <div class="tbl"><table id="tbl-annuities"></table></div>
+        <div class="callout"><strong>Got a real quote?</strong><span>Run MoneyHelper's <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/taking-your-pension/compare-annuities" target="_blank" rel="noopener">Compare annuities</a> for this household and enter the best quote. The model re-anchors to it and the whole desk updates.</span>
+          <div class="form">
             <label class="f">Product quoted <select id="qt-spec"></select></label>
-            <label class="f">Income quoted £/year <input id="qt-income" type="number" step="1" placeholder="e.g. 24600"></label>
-            <label class="f" style="grid-column:1/-1">…or paste the results list <textarea id="qt-paste" placeholder="Aviva £24,612 a year&#10;Just £2,040 per month"></textarea></label>
+            <label class="f">Income quoted £/year <input id="qt-income" type="number" step="1" placeholder="24600"></label>
+            <label class="f" style="grid-column:1/-1">Or paste the results list <textarea id="qt-paste" placeholder="Aviva £24,612 a year&#10;Just £2,040 per month"></textarea></label>
           </div>
-          <div class="ctrl"><button id="qt-add" type="button">Use this quote</button><button id="qt-clear" type="button" class="ghost">Clear quotes</button></div>
+          <div class="controls"><button class="btn" id="qt-add" type="button">Use this quote</button><button class="btn ghost" id="qt-clear" type="button">Clear quotes</button></div>
           <span id="qt-status"></span>
         </div>
-      </div></details>
-      <details class="dive" id="dive-inflation"><summary>Level or inflation-linked?<span>when protection pays for itself</span></summary><div>
-        <div class="ctrl"><label class="f">Average inflation: <span id="infl-val">3.5%</span><input id="infl" type="range" min="1" max="8" step="0.5" value="3.5"></label></div>
-        <div class="chart"><canvas id="ch-inflation" aria-label="Real income from level, 3% escalating and CPI-linked annuities"></canvas></div>
-        <div class="tbl-wrap"><table id="tbl-breakeven"></table></div>
-      </div></details>
-      <details class="dive" id="dive-longevity"><summary>How long the money must last<span>ONS 2022-based life tables</span></summary><div>
+      </div>
+      <div class="tabpanel" id="tab-inflation" role="tabpanel" hidden>
+        <h2 class="headline" id="inf-h"></h2>
+        <label class="f" style="max-width:320px">Average inflation <span class="num" id="infl-val">3.5%</span><input id="infl" type="range" min="1" max="8" step="0.5" value="3.5"></label>
+        <div class="chart"><canvas id="ch-inflation" aria-label="Real income from level, 3% rising and CPI-linked annuities"></canvas></div>
+        <div class="tbl"><table id="tbl-breakeven"></table></div>
+      </div>
+      <div class="tabpanel" id="tab-longevity" role="tabpanel" hidden>
+        <h2 class="headline" id="lon-h"></h2>
         <div class="figs" id="found-figs"></div>
-        <div class="chart short"><canvas id="ch-survival" aria-label="Chance of being alive by age"></canvas></div>
-      </div></details>
-      <details class="dive" id="dive-gilts"><summary>Low-coupon gilts for the bridge<span>tax-free gains outside a pension</span></summary><div>
-        <div class="ctrl"><label class="f">Your tax rate on savings interest <select id="gilt-rate"><option value="0">0%</option><option value="0.2">20% basic</option><option value="0.4" selected>40% higher</option><option value="0.45">45% additional</option></select></label></div>
-        <div class="tbl-wrap"><table id="tbl-gilts"></table></div>
-        <p class="small">Prices are a snapshot from 15 October 2026. Check live prices before buying. Inside a pension or ISA there is no tax difference between gilts.</p>
-      </div></details>
-      <details class="dive" id="dive-all"><summary>All options in one table<span>every annuity, drawdown rule and blend</span></summary><div>
-        <div class="tbl-wrap"><table id="tbl-compare"></table></div>
-      </div></details>
-      <details class="dive" id="dive-method"><summary>How the numbers are made<span>sources and simplifications</span></summary><div>
-        <div class="cols">
-          <div class="callout"><strong>Annuity prices</strong><span>Model fitted to 30 Hargreaves Lansdown best-buy rates (22 Oct 2026, within 2.4%), then shifted with the live 20-year gilt yield and implied inflation from the Bank of England. Your own quotes override it.</span></div>
-          <div class="callout"><strong>Markets</strong><span>UK equities, gilts, cash, CPI and long gilt yields each year since 1872 (Jordà–Schularick–Taylor Macrohistory Database, extended to 2025 with published figures). Simulations stitch together 5-year blocks of real history; "like today" futures open with a real decade that began in similar conditions.</span></div>
+        <div class="chart sm"><canvas id="ch-survival" aria-label="Chance of being alive by age"></canvas></div>
+      </div>
+      <div class="tabpanel" id="tab-gilts" role="tabpanel" hidden>
+        <h2 class="headline" id="gilt-h"></h2>
+        <label class="f" style="max-width:320px">Your tax rate on savings interest <select id="gilt-rate"><option value="0">0%</option><option value="0.2">20% basic</option><option value="0.4" selected>40% higher</option><option value="0.45">45% additional</option></select></label>
+        <div class="tbl"><table id="tbl-gilts"></table></div>
+        <p class="subtitle">Prices are a snapshot from 15 October 2026. Check live prices before buying. Inside a pension or ISA there is no tax difference between gilts.</p>
+      </div>
+      <div class="tabpanel" id="tab-all" role="tabpanel" hidden>
+        <h2 class="headline">Every annuity, drawdown rule and blend on the same futures</h2>
+        <div class="tbl"><table id="tbl-compare"></table></div>
+      </div>
+      <div class="tabpanel" id="tab-method" role="tabpanel" hidden>
+        <div class="callouts">
+          <div class="callout"><strong>Annuity prices</strong><span>Model fitted to 30 Hargreaves Lansdown best-buy rates (22 Oct 2026, within 2.4%), shifted with the live 20-year gilt yield and implied inflation. Your quotes override it.</span></div>
+          <div class="callout"><strong>Markets</strong><span>UK equities, gilts, cash, CPI and long gilt yields since 1872 (Macrohistory Database, extended to 2025). Futures stitch together 5-year blocks of real history; "like today" futures open with a real decade that began in similar conditions.</span></div>
           <div class="callout"><strong>People and tax</strong><span>ONS 2022-based life tables. rUK income tax, thresholds frozen to April 2031. State Pension £241.30 a week. Scottish tax and inheritance tax on pensions from April 2027 are not modelled.</span></div>
         </div>
-        <p class="small" id="history-summary"></p>
-        <ul class="sources">
+        <p class="subtitle" id="history-summary"></p>
+        <ul class="src">
           <li><a href="https://www.bankofengland.co.uk/boeapps/database/" target="_blank" rel="noopener">Bank of England database: Bank Rate, gilt yields, implied inflation</a></li>
           <li><a href="https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/d7g7/mm23" target="_blank" rel="noopener">ONS CPI annual rate (D7G7)</a></li>
           <li><a href="https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/lifeexpectancies/adhocs/2652pastandprojectedperiodandcohortmortalityratesqfromthe2022basedenglandlifetablesages0to125" target="_blank" rel="noopener">ONS 2022-based mortality rates</a></li>
@@ -314,12 +326,17 @@ ul.sources { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 
           <li><a href="https://www.hl.co.uk/retirement/annuities/best-buy-rates" target="_blank" rel="noopener">Hargreaves Lansdown annuity best buys</a></li>
           <li><a href="https://www.giltcalculator.co.uk/gilts" target="_blank" rel="noopener">Gilt prices snapshot</a></li>
         </ul>
-      </div></details>
-    </div>
-    <p class="notice"><strong>This is information, not advice.</strong> For free, impartial guidance from age 50, book a Pension Wise appointment through <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/pension-wise" target="_blank" rel="noopener">MoneyHelper</a>. A regulated adviser can recommend what suits you.</p>
-  </section>
+      </div>
+    </section>
+  </div>
 </main>
-</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><strong>Information, not advice.</strong> For free, impartial guidance from age 50, book a Pension Wise appointment through <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/pension-wise" target="_blank" rel="noopener">MoneyHelper</a>. A regulated adviser can recommend what suits you.</p>
+    <p>Part of <a href="https://github.com/spridgehub" target="_blank" rel="noopener">spridgehub</a>. Market data from the Bank of England and ONS; history from the Macrohistory Database; life tables from ONS.</p>
+  </div>
+</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>/*ENGINE*/</script>

@@ -51,7 +51,7 @@ inflation, starting conditions, annuity-for-bonds, survivor cover and gilts).
 ```sh
 npm test                 # 12 checks: tax, mortality, calibration, cash-flow invariants, quotes, gilts
 node cli.js [household.json]
-npm run build:web        # -> dist/pension-planner.html (bundles engine + data with esbuild)
+npm run build:web        # -> dist/pension-planner.html and docs/index.html (GitHub Pages)
 npm run calibrate        # refit the annuity basis after updating market rates
 ```
 
