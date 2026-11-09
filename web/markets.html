@@ -1,6 +1,7 @@
 <!-- Markets views: Equities and Commodities. Injected into app.html by scripts/build-web.js. -->
 <main class="wrap view" id="view-equities" hidden>
-  <section class="strip" id="eq-tickers" aria-label="Equity markets today"></section>
+  <p class="pick-lbl">Each market has its own page. Pick one to open it, or scroll down to compare them all.</p>
+  <nav class="strip tiles" id="eq-tickers" aria-label="Equity markets: open one"></nav>
   <p class="verdict" id="eq-verdict"></p>
 
   <section class="panel" aria-label="Equity settings">
@@ -110,7 +111,8 @@
 </main>
 
 <main class="wrap view" id="view-commodities" hidden>
-  <section class="strip" id="co-tickers" aria-label="Commodities today"></section>
+  <p class="pick-lbl">Each commodity has its own page. Pick one to open it, or scroll down to compare them all.</p>
+  <nav class="strip tiles" id="co-tickers" aria-label="Commodities: open one"></nav>
   <p class="verdict" id="co-verdict"></p>
 
   <section class="panel" aria-label="Commodity settings">
@@ -205,6 +207,77 @@
         <div class="callout"><strong>Miners are shares</strong><span>Gold-mining funds rise and fall harder than gold and also fall with the stock market. They are an equity bet with a gold flavour.</span></div>
         <div class="callout"><strong>No income</strong><span>Metals pay no interest or dividends, so all of the return is the price. That makes them a diversifier, not a source of retirement income. Many multi-asset funds hold none to about 10%.</span></div>
       </div>
+    </section>
+  </div>
+</main>
+
+<main class="wrap view" id="view-market" hidden>
+  <nav class="mk-switch" id="mk-switch" aria-label="Choose a market"></nav>
+
+  <section class="panel mk-head" aria-labelledby="mk-name">
+    <div class="mk-title">
+      <span class="mk-sw" id="mk-sw"></span>
+      <div><span class="section-lbl" id="mk-kind"></span><h1 id="mk-name"></h1></div>
+      <div class="mk-price"><span class="val" id="mk-price"></span><span class="sub" id="mk-price-sub"></span></div>
+    </div>
+    <p class="verdict" id="mk-verdict"></p>
+    <p class="subtitle" id="mk-about"></p>
+  </section>
+
+  <section class="strip" id="mk-figs" aria-label="Returns at a glance"></section>
+
+  <div class="grid">
+    <section class="panel" id="mk-chart" aria-labelledby="mkc-h">
+      <span class="section-lbl">Price history<span id="mkc-sub"></span></span>
+      <h2 class="headline" id="mkc-h"></h2>
+      <div class="controls">
+        <div class="ctl"><span class="lbl">Period</span><div class="seg" id="mk-range"></div></div>
+        <div class="ctl"><span class="lbl">Measured in</span><div class="seg" id="mk-ccy"><button type="button" data-v="GBP" aria-pressed="true">Pounds</button><button type="button" data-v="local" aria-pressed="false">Local currency</button></div></div>
+        <div class="ctl"><span class="lbl">Returns</span><div class="seg" id="mk-real"><button type="button" data-v="0" aria-pressed="true">Before inflation</button><button type="button" data-v="1" aria-pressed="false">After UK inflation</button></div></div>
+      </div>
+      <div class="chart tall"><canvas id="ch-mk" aria-label="Value of 10,000 pounds invested over the chosen period"></canvas></div>
+      <p class="subtitle" id="mkc-note"></p>
+    </section>
+
+    <section class="panel s7" id="mk-years" aria-labelledby="mky-h">
+      <span class="section-lbl">Year by year<span>calendar-year return in pounds</span></span>
+      <h2 class="headline" id="mky-h"></h2>
+      <div class="chart"><canvas id="ch-mky" aria-label="Return in each calendar year"></canvas></div>
+    </section>
+
+    <section class="panel s5" id="mk-risk" aria-labelledby="mkr-h">
+      <span class="section-lbl" id="mkr-lbl">Risks</span>
+      <h2 class="headline" id="mkr-h"></h2>
+      <div class="figs" id="mkr-figs"></div>
+      <div class="notes" id="mkr-notes"></div>
+    </section>
+
+    <section class="panel s6" id="mk-crash" aria-labelledby="mkx-h">
+      <span class="section-lbl">In past crashes<span>return in pounds over each episode</span></span>
+      <h2 class="headline" id="mkx-h"></h2>
+      <div class="tbl"><table id="tbl-mkx"></table></div>
+    </section>
+
+    <section class="panel s6" id="mk-dd" aria-labelledby="mkd-h">
+      <span class="section-lbl">Falls from the peak<span>all history in pounds</span></span>
+      <h2 class="headline" id="mkd-h"></h2>
+      <div class="chart sm"><canvas id="ch-mkd" aria-label="Drawdown from previous peak"></canvas></div>
+    </section>
+
+    <section class="panel" id="mk-outlook" aria-labelledby="mkp-h">
+      <span class="section-lbl">Looking ahead<span>10 years, after inflation</span></span>
+      <div class="ctl"><span class="lbl">Centre the range on</span><div class="seg" id="mk-centre"></div></div>
+      <h2 class="headline" id="mkp-h"></h2>
+      <div class="key" id="mkp-key"></div>
+      <div class="chart"><canvas id="ch-mkp" aria-label="Range of outcomes over 10 years"></canvas></div>
+      <p class="subtitle" id="mkp-sub"></p>
+      <div class="tbl" id="mkf-wrap"><table id="tbl-mkf"></table></div>
+    </section>
+
+    <section class="panel" id="mk-how" aria-labelledby="mkh-h">
+      <span class="section-lbl">Holding it<span>in a SIPP or ISA</span></span>
+      <h2 class="headline" id="mkh-h"></h2>
+      <p class="subtitle" id="mkh-p" style="font-size:13px"></p>
     </section>
   </div>
 </main>

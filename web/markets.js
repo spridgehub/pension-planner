@@ -89,15 +89,30 @@
   }
   const ccyLabel = (o, dollars) => (o.ccy === 'GBP' ? 'in pounds' : dollars ? 'in dollars' : 'in local currency') + (o.real ? ', after UK inflation' : '');
 
+  // Clickable tiles: each opens the market's own page.
+  function sparkSvg(values, color) {
+    const W = 160, H = 26, lo = Math.min(...values), hi = Math.max(...values), r = hi - lo || 1;
+    const d = values.map((v, i) => (i ? 'L' : 'M') + ((i / (values.length - 1)) * W).toFixed(1) + ' ' + (H - 3 - ((v - lo) / r) * (H - 6)).toFixed(1)).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="${d} L${W} ${H} L0 ${H} Z" fill="${rgba(color, 0.14)}"></path><path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"></path></svg>`;
+  }
+  const priceText = (id) => {
+    const p = E.latestPrice(id), u = A[id].unit;
+    if (!u) return Math.round(p.local).toLocaleString('en-GB');
+    return id === 'gold' || id === 'platinum' ? `${gbp(p.gbp)}/${u}` : id === 'silver' ? `£${p.gbp.toFixed(2)}/${u}` : `${usd(p.local, 2)}/${u}`;
+  };
+  function marketTiles(el, ids) {
+    $(el).innerHTML = ids.map((id) => {
+      const s = E.series(id), st1 = E.stats(s, E.addMonths(LAST, -12)), st10 = E.stats(s, E.addMonths(LAST, -120));
+      return `<a class="cell tile" href="#m-${id}" aria-label="Open the ${esc(name(id))} page"><span class="lbl"><i style="background:${col(id)}"></i>${esc(name(id))}</span><span class="go" aria-hidden="true">›</span><span class="val">${priceText(id)}</span><span class="sub">1 yr ${spc(st1?.total)} · 10 yr ${st10 ? pc(st10.cagr) + '/yr' : 'n/a'}</span>${sparkSvg(s.values.slice(-60), col(id))}</a>`;
+    }).join('');
+  }
+
   // ================= EQUITIES =================
   function renderEquities() {
     const e = S.eq;
     const o = { ccy: e.ccy, real: e.real };
     // tickers
-    $('eq-tickers').innerHTML = EQ.map((id) => {
-      const p = E.latestPrice(id), s = E.series(id), st1 = E.stats(s, E.addMonths(LAST, -12)), st10 = E.stats(s, E.addMonths(LAST, -120));
-      return `<div class="cell"><span class="lbl">${esc(name(id))}</span><span class="val">${Math.round(p.local).toLocaleString('en-GB')}</span><span class="sub">1 yr ${spc(st1?.total)} · 10 yr ${st10 ? pc(st10.cagr) + '/yr' : 'n/a'}</span></div>`;
-    }).join('');
+    marketTiles('eq-tickers', EQ);
     const v = R.valuation;
     const s10 = Object.fromEntries(EQ.map((id) => [id, E.stats(E.series(id), E.addMonths(LAST, -120))]));
     const ai = R.aiConcentration;
@@ -276,14 +291,7 @@
     const cr = R.commodities;
     const g = E.latestPrice('gold'), sv = E.latestPrice('silver');
     const ch1 = (id) => E.stats(E.series(id), E.addMonths(LAST, -12))?.total;
-    $('co-tickers').innerHTML = [
-      ['Gold', gbp(g.gbp) + '/oz', `${usd(g.local)} · 1 yr ${spc(ch1('gold'))} in £ · ${pc(1 - g.local / cr.goldRecord.usd, 0)} below Jan record`],
-      ['Silver', '£' + sv.gbp.toFixed(2) + '/oz', `${usd(sv.local, 2)} · 1 yr ${spc(ch1('silver'))} · ${pc(1 - sv.local / cr.silverRecord.usd, 0)} below Jan record`],
-      ['Platinum', gbp(E.latestPrice('platinum').gbp) + '/oz', `1 yr ${spc(ch1('platinum'))} in £`],
-      ['Copper', usd(E.latestPrice('copper').local, 2) + '/lb', `1 yr ${spc(ch1('copper'))} in £`],
-      ['Brent crude', usd(E.latestPrice('brent').local, 2) + '/bbl', `1 yr ${spc(ch1('brent'))} in £`],
-      ['Gold to silver', (g.local / sv.local).toFixed(1), 'ounces of silver per ounce of gold'],
-    ].map(([l, vv, s]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${vv}</span><span class="sub">${s}</span></div>`).join('');
+    marketTiles('co-tickers', CO);
     const g00 = E.stats(E.series('gold'), '2000-09'), f00 = E.stats(E.series('ftse'), '2000-09'), s00 = E.stats(E.series('spx'), '2000-09');
     const gl = E.stats(E.series('gold', { real: true }));
     $('co-verdict').innerHTML = `Since 2000 gold has returned ${pc(g00.cagr)} a year in pounds, ahead of the FTSE 100 (${pc(f00.cagr)} with dividends) and the S&amp;P 500 (${pc(s00.cagr)}). But it pays no income, and after its 1980 peak it lost ${pc(-gl.maxDD, 0)} of its real value and took ${Math.round(gl.ddRecoveredMonths / 12)} years to recover.`
@@ -380,19 +388,170 @@
     fan('ch-cop', 'cop', c.proj, c.centre === 'jpm' ? jpmReal : null, c.centre === 'jpm' ? `centred on ${pc(jpmReal)} a year after inflation (J.P. Morgan's ${pc(R.forecasts[0].values.gold)} for gold, less 2.5% inflation)` : 'centred on its own past return');
   }
 
+  // ================= ONE MARKET =================
+  const ABOUT = {
+    spx: ['US large companies', 'The 500 largest US-listed companies, weighted by size. About 60% of the world stock market by value, and a third of it now sits in eight technology giants.', 'S&P 500 trackers are among the cheapest funds there are (around 0.03 to 0.1% a year), as ETFs or index funds. Most global trackers are already about 70% US.'],
+    ndx: ['US technology-led', 'The 100 largest non-financial companies on the Nasdaq exchange: mostly technology, internet and biotech. A concentrated bet on US tech and AI.', 'Nasdaq-100 ETFs charge around 0.1 to 0.3% a year. Holding one beside an S&P 500 or global fund doubles up on the same giants.'],
+    ftse: ['UK large companies', 'The 100 largest companies on the London Stock Exchange. Heavy in banks, oil, mining, drugs and consumer staples; very little tech. About three quarters of its sales come from abroad.', 'FTSE 100 and FTSE All-Share trackers cost under 0.1% a year. UK dividends are high, which suits income in retirement.'],
+    nikkei: ['Japan', 'Japan\'s best-known index of 225 large companies, weighted by share price rather than size, so a few high-priced stocks (chip-equipment makers, Fast Retailing) dominate.', 'Most Japan funds track the broader TOPIX or MSCI Japan rather than the Nikkei; charges around 0.1 to 0.2%. Yen-hedged versions remove the currency swing.'],
+    kospi: ['South Korea', 'All shares on the Korea Exchange\'s main board, weighted by size. Samsung Electronics and SK Hynix, the memory-chip makers riding AI demand, now make up around 40%.', 'Held through MSCI Korea ETFs (around 0.2 to 0.6% a year) or Asia and emerging-market funds.'],
+    hsi: ['Hong Kong and China', 'The largest companies listed in Hong Kong, many of them Chinese: Tencent, Alibaba, HSBC, Xiaomi. Cheap on earnings, but with Chinese political and property risk.', 'Held through Hang Seng or MSCI China ETFs, or China and Asia funds, at around 0.1 to 0.6% a year.'],
+    taiex: ['Taiwan', 'All shares on the Taiwan Stock Exchange. TSMC, which makes most of the world\'s advanced chips, is over 40% of it, so it is close to a single-company AI bet with geopolitical risk.', 'Held through MSCI Taiwan ETFs (around 0.2 to 0.6%) or Asia and emerging-market funds.'],
+    nifty: ['India', 'India\'s 50 largest companies: banks, IT services, energy and consumer firms. Fast-growing economy, usually priced at a premium.', 'Held through Nifty 50 or MSCI India ETFs and India investment trusts, at around 0.2 to 0.8% a year.'],
+    gold: ['Precious metal', 'Priced in dollars per troy ounce. No income; driven by real interest rates, central-bank buying, the dollar and fear. The longest-running store of value there is.', 'Physical gold ETCs (backed by bars in a vault) work in a SIPP or ISA at around 0.1 to 0.25% a year. Britannia and Sovereign coins are free of Capital Gains Tax outside a pension.'],
+    silver: ['Precious and industrial metal', 'Priced in dollars per troy ounce. Over half of demand is industrial (solar panels, electronics), so it moves with the economy as well as with gold, and about twice as violently.', 'Physical silver ETCs work in a SIPP or ISA. Silver coins and bars carry 20% VAT when bought new, which is a steep hurdle.'],
+    platinum: ['Precious and industrial metal', 'Priced in dollars per troy ounce. Mostly used in car catalytic converters and jewellery, and mined mainly in South Africa and Russia, so supply shocks matter.', 'Physical platinum ETCs are available on most platforms; they are small and less liquid than gold.'],
+    copper: ['Industrial metal', 'Priced in dollars per pound. Used in wiring, power grids, electric cars and data centres, so it tracks global growth, China in particular, and the energy transition.', 'Held through futures-based ETCs, whose returns can differ from the spot price (roll costs), or through mining shares, which are an equity bet.'],
+    brent: ['Energy', 'Priced in dollars per barrel: the international benchmark for crude oil. Driven by OPEC supply decisions, global demand and wars.', 'Held through futures-based ETCs, which can lag the oil price badly when storage is tight. Oil companies in the FTSE 100 are the indirect route.'],
+  };
+  const REGION_FC = { spx: 'us', ndx: 'us', ftse: 'uk', nikkei: 'japan', kospi: 'em', hsi: 'em', taiex: 'em', nifty: 'em', gold: 'gold', silver: 'commodities', platinum: 'commodities', copper: 'commodities', brent: 'commodities' };
+  const MK = { id: 'spx', range: 120, ccy: 'GBP', real: false, centre: 'value' };
+  try { Object.assign(MK, JSON.parse(localStorage.getItem('pension-planner-market-v1') || '{}'), { id: MK.id }); } catch (e) { /* ignore */ }
+  const saveMk = () => { try { localStorage.setItem('pension-planner-market-v1', JSON.stringify({ range: MK.range, ccy: MK.ccy, real: MK.real, centre: MK.centre })); } catch (e) { /* ignore */ } };
+
+  function renderMarket(id) {
+    MK.id = id;
+    const a = A[id], isEq = EQ.includes(id), about = ABOUT[id];
+    const link = (x) => `<a href="#m-${x}"${x === id ? ' aria-current="page"' : ''}><i style="background:${col(x)}"></i>${esc(name(x))}</a>`;
+    $('mk-switch').innerHTML = `<a href="#equities" style="border-style:dashed">‹ All</a><span class="grp">Shares</span>${EQ.map(link).join('')}<span class="grp">Commodities</span>${CO.map(link).join('')}`;
+    $('mk-sw').style.background = col(id);
+    $('mk-kind').textContent = about[0];
+    $('mk-name').textContent = name(id);
+    const p = E.latestPrice(id);
+    $('mk-price').textContent = priceText(id);
+    $('mk-price-sub').textContent = `${a.unit ? usd(p.local, p.local < 100 ? 2 : 0) + '/' + a.unit + ' · ' : `index points (${a.ccy}) · `}${new Date(p.asOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    $('mk-about').textContent = about[1];
+
+    const sGbp = E.series(id), all = E.stats(sGbp);
+    const per = (n) => E.stats(sGbp, E.addMonths(LAST, -12 * n));
+    const dd = E.drawdowns(sGbp), ddNow = dd.values[dd.values.length - 1];
+    const s1 = per(1), s5 = per(5), s10 = per(10);
+    $('mk-figs').innerHTML = [
+      ['1 year', spc(s1?.total), 'in pounds' + (isEq ? ', with dividends' : '')],
+      ['5 years', s5 ? pc(s5.cagr) + '/yr' : 'n/a', s5 ? `£10k became ${gbpk(10000 * (1 + s5.total))}` : ''],
+      ['10 years', s10 ? pc(s10.cagr) + '/yr' : 'n/a', s10 ? `£10k became ${gbpk(10000 * (1 + s10.total))}` : ''],
+      [`Since ${sGbp.months[0].slice(0, 4)}`, pc(all.cagr) + '/yr', `after inflation ${pc(E.stats(E.series(id, { real: true })).cagr)}/yr`],
+      ['Swings (vol)', pc(all.vol, 0), 'typical yearly up or down'],
+      ['Below its high', ddNow > -0.005 ? 'At a high' : pc(ddNow, 0), `worst ever ${pc(all.maxDD, 0)}`],
+    ].map(([l, v, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${v}</span><span class="sub">${sub}</span></div>`).join('');
+    $('mk-verdict').innerHTML = s10
+      ? `${esc(name(id))} has returned ${pc(s10.cagr)} a year in pounds over the last ten years, with a worst fall of ${pc(-all.maxDD, 0)} in its history${ddNow < -0.05 ? ` and is ${pc(-ddNow, 0)} below its high today` : ''}.`
+      : `${esc(name(id))} has returned ${pc(all.cagr)} a year in pounds since ${mon(all.from)}.`;
+
+    renderMarketChart();
+    // calendar years
+    const cy = E.calendarYears(id).slice(-25);
+    const good = css('--good'), bad = css('--bad');
+    chart('ch-mky', { type: 'bar', data: { labels: cy.map((x) => (x.partial ? `${x.year} so far` : String(x.year))), datasets: [{ label: 'Return', data: cy.map((x) => x.r), backgroundColor: cy.map((x) => rgba(x.r >= 0 ? good : bad, x.partial ? 0.45 : 0.85)), borderRadius: 4, borderSkipped: 'start' }] }, options: opts({ y: (v) => pc(v, 0), zero: true, xTicks: 13, tip: (c) => `${pc(c.parsed.y)}` }) });
+    const done = cy.filter((x) => !x.partial);
+    const ups = done.filter((x) => x.r >= 0).length, best = [...done].sort((x, y) => y.r - x.r)[0], worst = [...done].sort((x, y) => x.r - y.r)[0];
+    $('mky-h').textContent = `Up in ${ups} of the last ${done.length} years. Best ${best.year} (${spc(best.r, 0)}), worst ${worst.year} (${pc(worst.r, 0)})`;
+
+    // risks panel
+    if (isEq) {
+      const ai = R.aiConcentration[id], st = E.aiStress(id, -0.4), v = R.valuation[id], imp = E.valuationReturn(id);
+      $('mkr-lbl').textContent = 'AI exposure and valuation';
+      $('mkr-h').textContent = ai?.weight != null ? `${pc(ai.weight, 0)} sits in AI-linked companies; a 40% fall in AI stocks would mean roughly ${st.direct != null ? pc(-st.direct, 0) + ' to ' : ''}${pc(-st.history, 0)} off this index` : `No AI hardware names; a 40% fall in chip stocks has meant about ${pc(-st.history, 0)} here`;
+      $('mkr-figs').innerHTML = [
+        ['AI names', ai?.weight != null ? pc(ai.weight, 0) : 'n/a', ai?.asOf ? `as of ${ai.asOf}` : ''],
+        ['Moves with chips', st.beta.toFixed(2), `${pc(st.r2, 0)} of swings shared`],
+        ['CAPE', v?.cape?.toFixed(1) ?? 'n/a', `forward P/E ${v?.fwdPe?.toFixed(1) ?? 'n/a'}`],
+        ['Implied real return', imp ? pc(imp.real) : 'n/a', imp ? `1 / ${imp.basis}, a year` : ''],
+      ].map(([l, vv, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${vv}</span><span class="sub">${sub}</span></div>`).join('');
+      $('mkr-notes').innerHTML = `<div class="note"><h3>${esc(ai?.names || '')}</h3><p>${esc(ai?.extra || '')}${ai?.src ? ` <a href="${ai.src}" target="_blank" rel="noopener">Source</a>` : ''}</p></div>`
+        + `<div class="note"><h3>Currency</h3><p>${a.ccy === 'GBP' ? 'Priced in pounds, so no currency risk for a UK investor, though most FTSE 100 profits are earned abroad.' : `Priced in ${a.ccy}. Over the last 10 years currency moves changed a UK investor's return from ${pc(E.stats(E.series(id, { ccy: 'local' }), E.addMonths(LAST, -120))?.cagr)} a year in ${a.ccy} to ${pc(s10?.cagr)} in pounds.`}</p></div>`;
+    } else {
+      const cr = R.commodities;
+      $('mkr-lbl').textContent = 'Risks and role';
+      const ep = E.EPISODES.filter((e) => (E.episodeReturn(id, e) ?? -1) > 0).length;
+      const corr = E.correlation([id, 'spx', 'ftse'], { years: 10 });
+      $('mkr-h').textContent = `Rose in ${ep} of ${E.EPISODES.length} share-market falls; moves with the S&P 500 at ${(Math.abs(corr[0][1]) < 0.005 ? 0 : corr[0][1]).toFixed(2)}`;
+      const rec = id === 'gold' ? cr.goldRecord : id === 'silver' ? cr.silverRecord : null;
+      $('mkr-figs').innerHTML = [
+        ['Corr. with S&P 500', (Math.abs(corr[0][1]) < 0.005 ? 0 : corr[0][1]).toFixed(2), '10 years, monthly, in £'],
+        ['Corr. with FTSE 100', (Math.abs(corr[0][2]) < 0.005 ? 0 : corr[0][2]).toFixed(2), '1 = lockstep, 0 = unrelated'],
+        rec ? ['Record high', usd(rec.usd, rec.usd < 1000 ? 2 : 0), `${new Date(rec.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}, ${pc(1 - p.local / rec.usd, 0)} above today`] : ['Worst fall', pc(all.maxDD, 0), `${mon(all.ddPeak)} to ${mon(all.ddTrough)}`],
+        ['Income', 'None', 'all return is price'],
+      ].map(([l, vv, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${vv}</span><span class="sub">${sub}</span></div>`).join('');
+      $('mkr-notes').innerHTML = id === 'gold' ? `<div class="note"><h3>Central banks</h3><p>${esc(cr.centralBanks.text)}</p></div>` : `<div class="note"><h3>Why it swings</h3><p>${esc(about[1])}</p></div>`;
+    }
+
+    // crashes
+    const cmp = id === 'spx' ? ['ftse', 'gold'] : id === 'gold' ? ['spx', 'ftse'] : ['spx', 'gold'];
+    $('tbl-mkx').innerHTML = `<thead><tr><th>Episode</th><th>${esc(name(id))}</th>${cmp.map((x) => `<th>${esc(name(x))}</th>`).join('')}</tr></thead><tbody>`
+      + E.EPISODES.map((e) => `<tr><td><span class="name">${esc(e.label)}</span><span class="gloss">${mshort(e.from)} to ${mshort(e.to)}</span></td>` + [id, ...cmp].map((x) => { const r = E.episodeReturn(x, e); return `<td class="${r == null ? '' : r < 0 ? 'down' : 'up'}">${r == null ? 'n/a' : spc(r, 0)}</td>`; }).join('') + '</tr>').join('') + '</tbody>';
+    const eps = E.EPISODES.map((e) => ({ e, r: E.episodeReturn(id, e) })).filter((x) => x.r != null).sort((x, y) => x.r - y.r);
+    $('mkx-h').textContent = !eps.length ? 'Too little history for these episodes' : eps[0].r > 0 ? `Rose in every episode it was around for; smallest gain ${spc(eps[0].r, 0)} (${eps[0].e.label})` : `Worst episode here: ${eps[0].e.label}, ${spc(eps[0].r, 0)}`;
+
+    // drawdowns
+    chart('ch-mkd', { type: 'line', data: { labels: dd.months.map(mon), datasets: [line(id, dd.values, { fill: { target: 'origin' }, backgroundColor: rgba(col(id), 0.12), borderWidth: 1.5 })] }, options: opts({ y: (v) => pc(v, 0), yMax: 0, tip: (c) => `${pc(c.parsed.y, 0)} below the high` }) });
+    $('mkd-h').textContent = `Worst fall ${pc(-all.maxDD, 0)}, ${mon(all.ddPeak)} to ${mon(all.ddTrough)}; ${all.ddRecoveredMonths != null ? `back to the old high after ${yrs(all.ddRecoveredMonths)}` : 'not yet back to that high'}`;
+
+    renderMarketOutlook();
+
+    $('mkh-h').textContent = isEq ? `How to hold ${name(id)}` : `How to hold ${name(id).toLowerCase()}`;
+    $('mkh-p').textContent = about[2] + ' Information, not advice.';
+    document.title = `${name(id)} · Pension Planner`;
+  }
+
+  function renderMarketChart() {
+    const id = MK.id, o = { ccy: MK.ccy, real: MK.real };
+    const full = E.series(id, o);
+    const opts0 = [[12, '1 year'], [36, '3 years'], [60, '5 years'], [120, '10 years'], [240, '20 years'], [0, 'All']].filter(([n]) => !n || n < full.months.length);
+    if (!opts0.some(([n]) => n === MK.range)) MK.range = 120 < full.months.length ? 120 : 0;
+    seg('mk-range', opts0.map(([n, l]) => [n, l]), MK.range, (v) => { MK.range = +v; saveMk(); renderMarketChart(); });
+    fixedSeg('mk-ccy', MK.ccy, (v) => { MK.ccy = v; saveMk(); renderMarketChart(); });
+    fixedSeg('mk-real', MK.real ? '1' : '0', (v) => { MK.real = v === '1'; saveMk(); renderMarketChart(); });
+    $('mk-ccy').querySelector('[data-v="local"]').textContent = A[id].ccy === 'USD' ? 'Dollars' : A[id].ccy === 'GBP' ? 'Pounds (same)' : `Local (${A[id].ccy})`;
+    const from = MK.range ? E.addMonths(LAST, -MK.range) : full.months[0];
+    const axis = monthsFrom(from < full.months[0] ? full.months[0] : from);
+    const data = rebased(full, axis);
+    const log = !MK.range || MK.range >= 240;
+    chart('ch-mk', { type: 'line', data: { labels: axis.map(mon), datasets: [line(id, data, { fill: { target: 'origin' }, backgroundColor: rgba(col(id), 0.1) }), { label: 'What you put in', data: axis.map(() => 10000), borderColor: css('--grey'), borderDash: [4, 3], borderWidth: 1, pointRadius: 0 }] }, options: (() => { const op = opts({ log, y: gbpk, tip: (c) => `${c.dataset.label}: ${gbp(c.parsed.y)}` }); if (!log) op.scales.y.beginAtZero = false; return op; })() });
+    const st = E.stats(full, axis[0]);
+    $('mkc-sub').textContent = `£10,000 invested ${ccyLabel(o, A[id].ccy === 'USD')}${log ? ', log scale' : ''}`;
+    $('mkc-h').textContent = st ? `£10,000 put in ${mon(st.from)} would be worth ${gbp(10000 * (1 + st.total))} now: ${pc(st.cagr)} a year, with a worst fall of ${pc(-st.maxDD, 0)} on the way` : '';
+    $('mkc-note').textContent = A[id].note ? A[id].note + '.' : EQ.includes(id) ? (A[id].tr ? 'Total return including dividends.' : `Price index plus its typical ${pc(A[id].divYield)} dividend yield.`) : 'Front-month futures price.';
+  }
+
+  function renderMarketOutlook() {
+    const id = MK.id, isEq = EQ.includes(id);
+    const alt = isEq ? ['value', 'Today\'s valuation'] : ['jpm', 'Long-run assumption'];
+    if (!['history', alt[0]].includes(MK.centre)) MK.centre = alt[0];
+    seg('mk-centre', [['history', 'Its own history'], alt], MK.centre, (v) => { MK.centre = v; saveMk(); renderMarketOutlook(); });
+    let centre = null, how = 'centred on its own past return';
+    if (MK.centre === 'value' && isEq) { const v = E.valuationReturn(id); centre = v?.real ?? null; how = `centred on ${pc(centre)} a year after inflation (1 / ${v?.basis})`; }
+    if (MK.centre === 'jpm' && !isEq) { const g = R.forecasts[0].values[id === 'gold' ? 'gold' : 'commodities']; centre = (1 + g) / 1.025 - 1; how = `centred on ${pc(centre)} a year after inflation (J.P. Morgan's ${pc(g)} for ${id === 'gold' ? 'gold' : 'commodities'}, less 2.5% inflation)`; }
+    fan('ch-mkp', 'mkp', id, centre, how);
+    const k = REGION_FC[id];
+    const rows = R.forecasts.filter((f) => f.values[k] != null);
+    $('mkf-wrap').hidden = !rows.length;
+    $('tbl-mkf').innerHTML = `<thead><tr><th>House forecast for ${{ us: 'US shares', uk: 'UK shares', japan: 'Japanese shares', em: 'emerging markets', gold: 'gold', commodities: 'commodities' }[k]}</th><th>Per year</th><th>Horizon</th><th>Basis</th></tr></thead><tbody>`
+      + rows.map((f) => `<tr><td><a href="${f.src}" target="_blank" rel="noopener">${esc(f.house)}</a><span class="gloss">${esc(f.asOf)}</span></td><td class="${f.values[k] < 0 ? 'down' : ''}">${pc(f.values[k])}</td><td>${esc(f.horizon)}</td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(f.basis)}</td></tr>`).join('')
+      + (id === 'gold' ? R.commodities.goldForecasts.map((f) => `<tr><td>${esc(f.house)} (price target)<span class="gloss">${esc(f.asOf)}</span></td><td>${spc(f.mid / E.latestPrice('gold').local - 1, 0)} total</td><td>to 2027</td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(f.view)}</td></tr>`).join('') : '') + '</tbody>';
+  }
+
   // ================= router =================
-  const VIEWS = { retire: 'view-retire', equities: 'view-equities', commodities: 'view-commodities' };
+  const VIEWS = { retire: 'view-retire', equities: 'view-equities', commodities: 'view-commodities', market: 'view-market' };
   const rendered = {};
   function viewFor(hash) {
     const h = (hash || '').replace('#', '');
     if (h === 'equities' || h.startsWith('eq-')) return 'equities';
     if (h === 'commodities' || h.startsWith('co-')) return 'commodities';
+    if (h.startsWith('m-') && A[h.slice(2)]) return 'market';
     return 'retire';
   }
   function show(view, scrollTo, nav = true) {
     for (const [k, id] of Object.entries(VIEWS)) $(id).hidden = k !== view;
-    document.querySelectorAll('.views a').forEach((a) => (a.dataset.view === view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-    document.querySelectorAll('.links a[data-in]').forEach((a) => { a.hidden = a.dataset.in !== view; });
+    const mid = view === 'market' ? (scrollTo || '').slice(2) : null;
+    const navView = view === 'market' ? (EQ.includes(mid) ? 'equities' : 'commodities') : view;
+    document.querySelectorAll('.views a').forEach((a) => (a.dataset.view === navView ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+    document.querySelectorAll('.links a[data-in]').forEach((a) => { a.hidden = a.dataset.in !== navView; });
+    if (view === 'market') {
+      try { renderMarket(mid); } catch (err) { console.error(err); }
+      if (nav) window.scrollTo(0, 0);
+      return;
+    }
     document.title = view === 'retire' ? 'Pension Planner' : `${view === 'equities' ? 'Equities' : 'Commodities'} · Pension Planner`;
     if (!rendered[view]) {
       rendered[view] = true;
@@ -409,7 +568,7 @@
   $('eqa-shock').value = Math.round(S.eq.shock * 100);
   $('eqp-id').addEventListener('change', () => { S.eq.proj = $('eqp-id').value; save(); renderOutlook(); });
   $('cop-id').addEventListener('change', () => { S.co.proj = $('cop-id').value; save(); renderCoOutlook(); });
-  const rerender = () => { for (const k of Object.keys(rendered)) rendered[k] = false; show(viewFor(location.hash), null, false); };
+  const rerender = () => { for (const k of Object.keys(rendered)) rendered[k] = false; show(viewFor(location.hash), location.hash.slice(1), false); };
   try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', rerender); } catch (e) { /* old browsers */ }
   new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 

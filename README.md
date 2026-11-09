@@ -76,6 +76,9 @@ platinum, copper and Brent, all from a UK investor's seat (in pounds, optionally
 inflation): growth of £10,000, track record, rolling returns, drawdowns, AI exposure and an
 AI stress test, valuations against later returns, published house forecasts, bootstrapped
 10-year ranges, a mix builder, crash behaviour, correlations and the gold to silver ratio.
+The tiles at the top of each page open a page per market (`#m-spx`, `#m-gold`, ...): price
+history over any period, calendar-year returns, AI exposure and valuation (shares) or role and
+records (commodities), crash record, drawdowns, a 10-year range and the house forecasts that apply.
 
 | File | Source |
 |---|---|

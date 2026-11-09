@@ -245,3 +245,19 @@ export const latestPrice = (id) => {
   const m = addMonths(a.first, a.px.length - 1);
   return { local: a.last.price ?? a.px[a.px.length - 1], gbp: (a.last.price ?? a.px[a.px.length - 1]) / fxAt(a.ccy, m), asOf: a.last.time, ccy: a.ccy };
 };
+
+// Calendar-year returns (December to December; the current year is year to date).
+export function calendarYears(id, opts = {}) {
+  const s = series(id, opts);
+  const out = [];
+  for (let i = 0; i < s.months.length; i++) {
+    if (!s.months[i].endsWith('-12')) continue;
+    const y = +s.months[i].slice(0, 4) + 1;
+    let j = s.months.indexOf(`${y}-12`);
+    const partial = j < 0;
+    if (partial) j = s.months.length - 1;
+    if (j <= i) continue;
+    out.push({ year: y, r: s.values[j] / s.values[i] - 1, partial });
+  }
+  return out;
+}
