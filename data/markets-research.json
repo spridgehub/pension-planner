@@ -1,0 +1,53 @@
+{
+  "retrieved": "2026-11-09",
+  "note": "Hand-entered from published sources. Weights and valuations move daily; refresh by hand. Valuations use Siblis Research on one date (30 Sep 2026) so markets compare like for like.",
+  "valuation": {
+    "spx": { "cape": 35.89, "pe": 25.96, "fwdPe": 19.45, "divYield": 0.011, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "alt": "multpl.com CAPE 38.9 on 6 Nov 2026" },
+    "ndx": { "cape": null, "pe": 35.09, "fwdPe": 23.26, "divYield": null, "asOf": "2026-09-30", "src": "https://siblisresearch.com/data/nasdaq-100-pe-ratio/" },
+    "ftse": { "cape": 19.60, "pe": 14.73, "fwdPe": 12.02, "divYield": 0.031, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "basis": "UK market" },
+    "nikkei": { "cape": 35.42, "pe": 19.05, "fwdPe": 15.73, "divYield": null, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "basis": "Japan market" },
+    "kospi": { "cape": 31.78, "pe": 12.39, "fwdPe": 5.11, "divYield": 0.009, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "basis": "Korea market; forward P/E low on expected memory-chip profits" },
+    "hsi": { "cape": 10.18, "pe": 12.17, "fwdPe": 10.48, "divYield": null, "asOf": "2026-09-30", "src": "https://siblisresearch.com/data/hang-seng-cape/" },
+    "taiex": { "cape": 46.68, "pe": 27.25, "fwdPe": 18.87, "divYield": null, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "basis": "Taiwan market" },
+    "nifty": { "cape": 28.67, "pe": 21.19, "fwdPe": 18.68, "divYield": 0.014, "asOf": "2026-09-30", "src": "https://siblisresearch.com/search/cape", "basis": "India market" },
+    "world": { "cape": 29.05, "median": 21.59, "asOf": "2026-09-30", "src": "https://siblisresearch.com/data/world-cape-ratio/" }
+  },
+  "aiConcentration": {
+    "spx": { "weight": 0.358, "names": "Apple, Nvidia, Microsoft, Alphabet, Amazon, Broadcom, Meta, Tesla", "extra": "Top 10 37.6%; tech sector 36.7% (record 39.4% in June 2026)", "asOf": "2026-11-06", "src": "https://www.stockanalysis.com/etf/spy/holdings" },
+    "ndx": { "weight": 0.419, "names": "The same eight; Micron adds 3.7% more", "extra": "Top 10 46.8%", "asOf": "2026-11-06", "src": "https://www.stockanalysis.com/etf/qqq/holdings" },
+    "ftse": { "weight": 0.01, "names": "Almost no AI or chip makers", "extra": "Tech about 1%", "asOf": "2026-06", "src": "https://www.ajbell.co.uk/group/news/computacenter-clicks-gear-it-prepares-ftse-100-entry" },
+    "nikkei": { "weight": 0.274, "names": "Advantest, Tokyo Electron, SoftBank Group", "extra": "Price weighted with a 10% cap per stock", "asOf": "2026-07-17", "src": "https://indexes.nikkei.co.jp/en/nkave/archives/summary" },
+    "kospi": { "weight": 0.409, "names": "Samsung Electronics, SK Hynix (memory chips for AI)", "extra": "34% at end of 2025; some mid-2026 estimates 45 to 48%", "asOf": "2026-04", "src": "https://en.fnnews.com/news/202604151825494221" },
+    "hsi": { "weight": 0.172, "names": "Tencent, Alibaba, Xiaomi", "extra": "Chinese AI is a different trade from US chips", "asOf": "2026-06-30", "src": "https://www.mitrade.com/ae-en/insights/indices/indices-basics/understanding-the-hang-seng-index" },
+    "taiex": { "weight": 0.443, "names": "TSMC alone", "extra": "Makes most of the world's AI chips", "asOf": "2026-04", "src": "https://focustaiwan.tw/business/202604240013" },
+    "nifty": { "weight": null, "names": "No AI hardware; IT services firms may be disrupted by AI rather than helped", "asOf": null, "src": null }
+  },
+  "aiContext": {
+    "capex": "Amazon, Alphabet, Meta and Microsoft (with SpaceX) are expected to spend about $800bn to $830bn on capital spending in 2026, mostly AI data centres, and all signal more in 2027.",
+    "capexSrc": "https://www.hl.co.uk/news/ai-hyperscalers-are-expected-to-finish-the-year-spending-a-whopping-828-billion-on-capex",
+    "warnings": [
+      { "who": "IMF, Global Financial Stability Report", "date": "Oct 2026", "text": "A sharp fall in AI share prices is one of three salient risks; hyperscaler borrowing is spreading AI risk into credit markets.", "src": "https://www.businessday.co.za/world/americas/2026-10-13-imf-warns-of-risks-from-ai-market-correction-and-war/" },
+      { "who": "Bank of England, Financial Policy Committee", "date": "2025 to 2026", "text": "Valuations look especially stretched for AI-focused firms; a correction would spill over to the UK.", "src": "https://fortune.com/2025/10/08/bank-of-england-ai-mania-equity-valuations-stretched-dotcom-bubble/" }
+    ]
+  },
+  "forecasts": [
+    { "house": "J.P. Morgan LTCMA 2027", "horizon": "10 to 15 years", "basis": "USD, nominal", "asOf": "Oct 2026", "src": "https://am.jpmorgan.com/us/en/asset-management/institutional/about-us/media/press-releases/jp-morgan-releases-2027-long-term-capital-market-assumptions/", "values": { "us": 0.075, "em": 0.071, "global": 0.075, "gold": 0.055, "commodities": 0.048 } },
+    { "house": "Vanguard VCMM", "horizon": "10 years", "basis": "USD, nominal (range midpoint)", "asOf": "Sep 2026", "src": "https://corporate.vanguard.com/content/corporatesite/us/en/corp/vemo/vemo-return-forecasts.html", "values": { "us": 0.058, "devExUs": 0.063, "em": 0.047 }, "ranges": { "us": "4.8 to 6.8%", "devExUs": "5.3 to 7.3%", "em": "3.7 to 5.7%" } },
+    { "house": "Schroders", "horizon": "10 years", "basis": "local currency, nominal", "asOf": "Jan 2026", "src": "https://mybrand.schroders.com/m/3c078fcb2904dfb9/original/10-year-returns-forecast-January-2026.pdf", "values": { "us": 0.052, "uk": 0.088, "japan": 0.083, "em": 0.09, "global": 0.059, "commodities": 0.043 } },
+    { "house": "Research Affiliates", "horizon": "10 years", "basis": "USD, nominal", "asOf": "May 2026", "src": "https://fortune.com/2026/05/21/bond-yields-today-highest-since-2007-stocks-outlook/", "values": { "us": 0.032 } },
+    { "house": "GMO", "horizon": "7 years", "basis": "USD, after inflation", "asOf": "Sep 2026", "src": "https://www.gmo.com/globalassets/articles/gmo-7-year-asset-class-forecast/2026/gmo-7-year-asset-class-forecastsep26.pdf", "values": { "us": -0.073, "devExUs": -0.009, "em": 0.002 }, "real": true }
+  ],
+  "commodities": {
+    "goldRecord": { "usd": 5590, "date": "2026-01-28", "src": "https://metalcharts.org/precious-metals-all-time-highs" },
+    "silverRecord": { "usd": 121.67, "date": "2026-01-29", "src": "https://www.moneymetals.com/price/silver-price-all-time-high" },
+    "centralBanks": { "t2025": 848, "ytd2026": 675, "q3_2026": 321, "text": "Central banks bought 848 tonnes in 2025 and about 675 tonnes in the first nine months of 2026 (321 in Q3, led by China and Poland). The World Gold Council expects 2026 to at least match 2025.", "src": "https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q3-2026/central-banks" },
+    "goldForecasts": [
+      { "house": "J.P. Morgan", "view": "$6,200 to $6,300 by late 2027", "mid": 6250, "asOf": "Jul 2026" },
+      { "house": "Goldman Sachs", "view": "about $5,600", "mid": 5600, "asOf": "Jul 2026" },
+      { "house": "UBS", "view": "$5,200 by June 2027, possible dip to $3,850 first", "mid": 5200, "asOf": "2026" },
+      { "house": "Bank of America", "view": "$5,000 to $6,000 ($8,000 in an extreme case)", "mid": 5500, "asOf": "Jul 2026" },
+      { "house": "HSBC", "view": "$4,925", "mid": 4925, "asOf": "Jul 2026" }
+    ],
+    "goldForecastsSrc": "https://channel8.com/english/news/61694"
+  }
+}

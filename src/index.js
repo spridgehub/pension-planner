@@ -14,3 +14,4 @@ export * from './market.js';
 export * from './regimes.js';
 export * from './scenarios.js';
 export * from './insights.js';
+export * from './markets.js';

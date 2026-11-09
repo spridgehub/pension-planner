@@ -68,6 +68,24 @@ E.inflationProtection(household, E.MARKET_BASIS);
 E.giltAfterTax(E.SAMPLE_GILTS[0], 0.4);
 ```
 
+## Equities and Commodities pages
+
+Two more pages (`#equities`, `#commodities`, switched from the nav) look at the S&P 500,
+Nasdaq-100, FTSE 100, Nikkei 225, KOSPI, Hang Seng, TAIEX and Nifty 50, and at gold, silver,
+platinum, copper and Brent, all from a UK investor's seat (in pounds, optionally after UK
+inflation): growth of £10,000, track record, rolling returns, drawdowns, AI exposure and an
+AI stress test, valuations against later returns, published house forecasts, bootstrapped
+10-year ranges, a mix builder, crash behaviour, correlations and the gold to silver ratio.
+
+| File | Source |
+|---|---|
+| `data/assets.json` | `npm run refresh:assets`: Yahoo Finance monthly closes (daily for futures), BoE month-end sterling rates, ONS CPI, Shiller's S&P 500 data, gold since 1833 |
+| `data/markets-research.json` | Hand-entered with sources: valuations (Siblis, 30 Sep 2026), AI-name index weights, house forecasts, gold forecasts and central-bank buying. Refresh by hand. |
+
+Engine: `src/markets.js` (`series`, `stats`, `rolling`, `beta`, `aiStress`, `projection`, `mix`, ...).
+UI: `web/markets.html` and `web/markets.js`, injected by `scripts/build-web.js`.
+Dividends: true total return for the S&P 500; elsewhere the index's typical yield is added.
+
 ## Simplifications
 
 - Tax: rUK only (no Scottish rates). Inheritance tax on pensions from April 2027 is not modelled; legacy figures are gross.

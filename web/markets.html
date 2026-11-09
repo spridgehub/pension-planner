@@ -1,0 +1,210 @@
+<!-- Markets views: Equities and Commodities. Injected into app.html by scripts/build-web.js. -->
+<main class="wrap view" id="view-equities" hidden>
+  <section class="strip" id="eq-tickers" aria-label="Equity markets today"></section>
+  <p class="verdict" id="eq-verdict"></p>
+
+  <section class="panel" aria-label="Equity settings">
+    <div class="controls">
+      <div class="ctl"><span class="lbl">Markets</span><div class="seg" id="eq-pick"></div></div>
+    </div>
+    <div class="controls">
+      <div class="ctl"><span class="lbl">From</span><div class="seg" id="eq-from"></div></div>
+      <div class="ctl"><span class="lbl">Measured in</span><div class="seg" id="eq-ccy"><button type="button" data-v="GBP" aria-pressed="true">Pounds</button><button type="button" data-v="local" aria-pressed="false">Local currency</button></div></div>
+      <div class="ctl"><span class="lbl">Returns</span><div class="seg" id="eq-real"><button type="button" data-v="0" aria-pressed="true">Before inflation</button><button type="button" data-v="1" aria-pressed="false">After UK inflation</button></div></div>
+    </div>
+    <p class="subtitle">Dividends are included: actual total return for the S&amp;P 500, and the index's typical yield added month by month for the others. In pounds, a UK investor's actual experience includes currency moves.</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel" id="eq-growth" aria-labelledby="eqg-h">
+      <span class="section-lbl">Growth of £10,000<span>log scale, so equal slopes mean equal % growth</span></span>
+      <h2 class="headline" id="eqg-h"></h2>
+      <div class="key" id="eqg-key"></div>
+      <div class="chart tall"><canvas id="ch-eqg" aria-label="Growth of 10,000 pounds in each selected market"></canvas></div>
+    </section>
+
+    <section class="panel" id="eq-stats" aria-labelledby="eqs-h">
+      <span class="section-lbl">Track record<span id="eqs-sub"></span></span>
+      <h2 class="headline" id="eqs-h"></h2>
+      <div class="tbl"><table id="tbl-eqs"></table></div>
+      <p class="subtitle">Worst fall is peak to trough on month-end prices. Time under water is how long it took to get back to the old high (still counting if it has not).</p>
+    </section>
+
+    <section class="panel s6" id="eq-rolling" aria-labelledby="eqr-h">
+      <span class="section-lbl">Patience<span>yearly return over every 10-year holding period</span></span>
+      <h2 class="headline" id="eqr-h"></h2>
+      <div class="controls"><div class="ctl"><span class="lbl">Holding period</span><div class="seg" id="eqr-years"><button type="button" data-v="5" aria-pressed="false">5 years</button><button type="button" data-v="10" aria-pressed="true">10 years</button><button type="button" data-v="15" aria-pressed="false">15 years</button></div></div></div>
+      <div class="chart"><canvas id="ch-eqr" aria-label="Annualised return of every rolling holding period by start date"></canvas></div>
+      <div class="tbl"><table id="tbl-eqr"></table></div>
+    </section>
+
+    <section class="panel s6" id="eq-dd" aria-labelledby="eqd-h">
+      <span class="section-lbl">Falls from the peak<span>how far below its last high</span></span>
+      <h2 class="headline" id="eqd-h"></h2>
+      <div class="chart"><canvas id="ch-eqd" aria-label="Drawdown from previous peak"></canvas></div>
+      <p class="subtitle">Japan is the warning: the Nikkei peaked in December 1989 and took 34 years to regain that level in yen.</p>
+    </section>
+
+    <section class="panel" id="eq-ai" aria-labelledby="eqa-h">
+      <span class="section-lbl">AI exposure<span>how much each market leans on AI and chip stocks</span></span>
+      <h2 class="headline" id="eqa-h"></h2>
+      <p class="subtitle" id="eqa-sub"></p>
+      <div class="tbl"><table id="tbl-eqa"></table></div>
+      <div class="controls">
+        <label class="f" style="min-width:280px;max-width:360px">If AI and chip stocks fell <span class="num" id="eqa-val">40%</span><input id="eqa-shock" type="range" min="10" max="80" step="5" value="40"></label>
+      </div>
+      <div class="key" id="eqa-key"></div>
+      <div class="chart sm"><canvas id="ch-eqa" aria-label="Estimated fall in each index for the chosen fall in AI stocks"></canvas></div>
+      <p class="subtitle">Two estimates. <b>Direct</b>: the index's weight in its AI names times the fall, everything else unchanged (a floor). <b>Past link</b>: how much the index has moved with US chip stocks (SOX, in pounds) over the last 10 years, applied to the fall. Real sell-offs spread wider than the direct figure, as 2000 to 2002 showed.</p>
+      <div class="callouts" id="eqa-warn"></div>
+    </section>
+
+    <section class="panel" id="eq-outlook" aria-labelledby="eqo-h">
+      <span class="section-lbl">Looking ahead<span>valuations, house forecasts and a range of outcomes</span></span>
+      <h2 class="headline" id="eqo-h"></h2>
+      <p class="subtitle">Nobody can forecast markets. Starting valuation is the one measure with a decent record for 10-year returns: when prices are high relative to the last 10 years' earnings (CAPE), later returns have tended to be lower. It says little about the next year.</p>
+      <div class="grid">
+        <div class="s7 gpane">
+          <span class="lbl">Valuation now and what it implies</span>
+          <div class="tbl"><table id="tbl-eqv"></table></div>
+        </div>
+        <div class="s5 gpane">
+          <span class="lbl">S&amp;P 500: starting CAPE vs the next 10 years</span>
+          <div class="chart sm"><canvas id="ch-cape" aria-label="S&P 500 CAPE against the following 10-year return"></canvas></div>
+          <p class="subtitle" id="cape-note"></p>
+        </div>
+      </div>
+      <span class="lbl">What the big investment houses expect, per year</span>
+      <div class="tbl"><table id="tbl-eqf"></table></div>
+      <div class="controls">
+        <label class="f" style="min-width:200px">Market <select id="eqp-id"></select></label>
+        <div class="ctl"><span class="lbl">Centre the range on</span><div class="seg" id="eqp-centre"><button type="button" data-v="history" aria-pressed="false">Its own history</button><button type="button" data-v="value" aria-pressed="true">Today's valuation</button></div></div>
+      </div>
+      <h3 class="headline" id="eqp-h" style="font-size:14px"></h3>
+      <div class="key" id="eqp-key"></div>
+      <div class="chart"><canvas id="ch-eqp" aria-label="Range of outcomes for 10,000 pounds over 10 years after inflation"></canvas></div>
+      <p class="subtitle" id="eqp-sub"></p>
+    </section>
+
+    <section class="panel" id="eq-mix" aria-labelledby="eqm-h">
+      <span class="section-lbl">Build a mix<span>rebalanced each January, in pounds, after inflation</span></span>
+      <h2 class="headline" id="eqm-h"></h2>
+      <div class="mixer" id="eqm-sliders"></div>
+      <div class="controls"><div class="ctl"><span class="lbl">Presets</span><div class="seg" id="eqm-presets"></div></div></div>
+      <div class="strip" id="eqm-figs"></div>
+      <div class="key" id="eqm-key"></div>
+      <div class="chart"><canvas id="ch-eqm" aria-label="Growth of the chosen mix against single markets"></canvas></div>
+    </section>
+
+    <section class="panel" id="eq-how" aria-labelledby="eqh-h">
+      <span class="section-lbl">Holding them<span>inside a SIPP or ISA</span></span>
+      <h2 class="headline" id="eqh-h">Cheap index funds cover every market here; the choice is how much of each</h2>
+      <div class="callouts">
+        <div class="callout"><strong>You may already own them</strong><span>A global tracker is about 70% US and roughly a quarter in the same AI names. Adding an S&amp;P 500 or Nasdaq fund on top doubles down on that bet.</span></div>
+        <div class="callout"><strong>Index funds and ETFs</strong><span>Every index on this page has trackers on SIPP and ISA platforms with yearly charges from under 0.1% (US, UK) to 0.2 to 0.6% (single Asian countries). Check the fund's charge and whether it pays out or reinvests dividends.</span></div>
+        <div class="callout"><strong>Currency</strong><span>Overseas shares carry currency risk. A strong pound cuts your return; a weak pound adds to it, which often cushions a crash. Hedged share classes remove this at a small cost.</span></div>
+        <div class="callout"><strong>Near or in retirement</strong><span>A big fall just before or soon after you start drawing does the most damage (sequence risk). See the Retirement page's backtest for how a 60/40 plan held up.</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<main class="wrap view" id="view-commodities" hidden>
+  <section class="strip" id="co-tickers" aria-label="Commodities today"></section>
+  <p class="verdict" id="co-verdict"></p>
+
+  <section class="panel" aria-label="Commodity settings">
+    <div class="controls">
+      <div class="ctl"><span class="lbl">Show</span><div class="seg" id="co-pick"></div></div>
+    </div>
+    <div class="controls">
+      <div class="ctl"><span class="lbl">From</span><div class="seg" id="co-from"></div></div>
+      <div class="ctl"><span class="lbl">Measured in</span><div class="seg" id="co-ccy"><button type="button" data-v="GBP" aria-pressed="true">Pounds</button><button type="button" data-v="local" aria-pressed="false">Dollars</button></div></div>
+      <div class="ctl"><span class="lbl">Returns</span><div class="seg" id="co-real"><button type="button" data-v="0" aria-pressed="true">Before inflation</button><button type="button" data-v="1" aria-pressed="false">After UK inflation</button></div></div>
+    </div>
+    <p class="subtitle">Front-month futures prices (COMEX gold, silver and copper; NYMEX platinum; ICE Brent), close to what a physical ETC tracks before its charge. Gold before Sep 2000 is the monthly average spot price.</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel" id="co-long" aria-labelledby="col-h">
+      <span class="section-lbl">Gold over 50 years<span>in pounds after UK inflation, log scale</span></span>
+      <h2 class="headline" id="col-h"></h2>
+      <div class="chart tall"><canvas id="ch-col" aria-label="Gold price in pounds after inflation since 1975"></canvas></div>
+      <div class="strip" id="col-figs"></div>
+    </section>
+
+    <section class="panel" id="co-growth" aria-labelledby="cog-h">
+      <span class="section-lbl">Growth of £10,000<span>commodities against shares, log scale</span></span>
+      <h2 class="headline" id="cog-h"></h2>
+      <div class="key" id="cog-key"></div>
+      <div class="chart tall"><canvas id="ch-cog" aria-label="Growth of 10,000 pounds in commodities and share indices"></canvas></div>
+    </section>
+
+    <section class="panel" id="co-stats" aria-labelledby="cos-h">
+      <span class="section-lbl">Track record<span id="cos-sub"></span></span>
+      <h2 class="headline" id="cos-h"></h2>
+      <div class="tbl"><table id="tbl-cos"></table></div>
+    </section>
+
+    <section class="panel s7" id="co-crisis" aria-labelledby="coc-h">
+      <span class="section-lbl">In a crash<span>return in pounds while shares fell</span></span>
+      <h2 class="headline" id="coc-h"></h2>
+      <div class="tbl"><table id="tbl-coc"></table></div>
+    </section>
+
+    <section class="panel s5" id="co-corr" aria-labelledby="cor-h">
+      <span class="section-lbl">Moving together<span>correlation of monthly returns in pounds, 10 years</span></span>
+      <h2 class="headline" id="cor-h"></h2>
+      <div class="tbl"><table id="tbl-cor" class="corr"></table></div>
+      <p class="subtitle">1 means they move in lockstep, 0 unrelated, below 0 opposite. Low numbers are what make a holding useful alongside shares.</p>
+    </section>
+
+    <section class="panel s6" id="co-ratio" aria-labelledby="cora-h">
+      <span class="section-lbl">Gold to silver ratio<span>ounces of silver one ounce of gold buys</span></span>
+      <h2 class="headline" id="cora-h"></h2>
+      <div class="chart sm"><canvas id="ch-cora" aria-label="Gold to silver price ratio since 2000"></canvas></div>
+      <p class="subtitle">Silver is part precious metal, part industrial (solar panels, electronics), so it swings harder than gold in both directions.</p>
+    </section>
+
+    <section class="panel s6" id="co-dd" aria-labelledby="cod-h">
+      <span class="section-lbl">Falls from the peak<span>in pounds</span></span>
+      <h2 class="headline" id="cod-h"></h2>
+      <div class="chart sm"><canvas id="ch-cod" aria-label="Commodity drawdowns from previous peak"></canvas></div>
+    </section>
+
+    <section class="panel" id="co-outlook" aria-labelledby="coo-h">
+      <span class="section-lbl">Looking ahead<span>what drives the price, and what forecasters say</span></span>
+      <h2 class="headline" id="coo-h"></h2>
+      <div class="grid">
+        <div class="s7 gpane">
+          <span class="lbl">Bank forecasts for gold, converted at today's exchange rate</span>
+          <div class="tbl"><table id="tbl-cof"></table></div>
+          <p class="subtitle" id="cof-note"></p>
+        </div>
+        <div class="s5 gpane">
+          <span class="lbl">What moves gold</span>
+          <div class="notes" id="co-drivers"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <label class="f" style="min-width:200px">Metal <select id="cop-id"><option value="gold">Gold</option><option value="silver">Silver</option></select></label>
+        <div class="ctl"><span class="lbl">Centre the range on</span><div class="seg" id="cop-centre"><button type="button" data-v="history" aria-pressed="false">Its own history</button><button type="button" data-v="jpm" aria-pressed="true">Long-run assumption</button></div></div>
+      </div>
+      <h3 class="headline" id="cop-h" style="font-size:14px"></h3>
+      <div class="key" id="cop-key"></div>
+      <div class="chart"><canvas id="ch-cop" aria-label="Range of outcomes for 10,000 pounds in the metal over 10 years after inflation"></canvas></div>
+      <p class="subtitle" id="cop-sub"></p>
+    </section>
+
+    <section class="panel" id="co-how" aria-labelledby="coh-h">
+      <span class="section-lbl">Holding them<span>UK rules</span></span>
+      <h2 class="headline" id="coh-h">Physical ETCs work in a SIPP or ISA; coins are the tax-free route outside them</h2>
+      <div class="callouts">
+        <div class="callout"><strong>Physical ETCs</strong><span>Exchange-traded commodities backed by metal in a vault, such as iShares Physical Gold or Invesco Physical Gold. Allowed in SIPPs and ISAs. Charges about 0.1 to 0.25% a year. Silver and platinum versions exist.</span></div>
+        <div class="callout"><strong>Coins</strong><span>Britannias and Sovereigns are UK legal tender, so they are free of Capital Gains Tax, and investment gold carries no VAT. They cannot go in a pension. Silver coins and bars carry 20% VAT when bought new.</span></div>
+        <div class="callout"><strong>Miners are shares</strong><span>Gold-mining funds rise and fall harder than gold and also fall with the stock market. They are an equity bet with a gold flavour.</span></div>
+        <div class="callout"><strong>No income</strong><span>Metals pay no interest or dividends, so all of the return is the price. That makes them a diversifier, not a source of retirement income. Many multi-asset funds hold none to about 10%.</span></div>
+      </div>
+    </section>
+  </div>
+</main>

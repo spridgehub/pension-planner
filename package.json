@@ -9,7 +9,8 @@
     "calibrate": "node scripts/calibrate.js",
     "cli": "node cli.js",
     "build:web": "node scripts/build-web.js",
-    "refresh": "node scripts/fetch-market.js && node scripts/build-web.js"
+    "refresh": "node scripts/fetch-market.js && node scripts/fetch-assets.js && node scripts/build-web.js",
+    "refresh:assets": "node scripts/fetch-assets.js"
   },
   "license": "UNLICENSED",
   "private": true

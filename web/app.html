@@ -74,7 +74,7 @@ a { color: var(--accent-ink); }
 .links .sep { width: 1px; height: 16px; background: var(--rule-strong); margin: 0 6px; flex: none; }
 .asof { font: 500 12px/1 var(--font-num); color: var(--ink-4); white-space: nowrap; }
 @media (max-width: 900px) { .asof { display: none; } }
-.panel[id], .strip { scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+.panel[id], .strip, .view { scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 72px); }
 
 main.wrap { display: grid; gap: 16px; padding-block: 18px 40px; }
 
@@ -182,14 +182,39 @@ ul.src { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12.5
 .foot a { color: var(--ink-3); }
 .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .status { font: 400 12px/1.3 var(--font-num); color: var(--ink-4); min-height: 1.3em; }
+/* pages: Retirement, Equities, Commodities */
+.views { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--rule); border-radius: var(--r-pill); background: var(--inset); flex: none; }
+.views a { font: 600 13px/1 var(--font-ui); color: var(--ink-3); text-decoration: none; padding: 7px 12px; border-radius: var(--r-pill); white-space: nowrap; transition: color .15s var(--ease-out), background-color .15s var(--ease-out); }
+.views a:hover { color: var(--ink-1); }
+.views a[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
+@media (max-width: 720px) { .nav .wrap { height: auto; flex-wrap: wrap; padding-block: 8px; gap: 8px 12px; } .links { flex-basis: 100%; order: 3; } .views a { padding: 7px 10px; } }
+.chart.tall { height: 380px; }
+.seg button .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.mixer { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 18px; }
+.mixer label { display: grid; gap: 4px; font: 500 12px/1.3 var(--font-ui); color: var(--ink-2); }
+.mixer label .num { float: right; color: var(--ink-1); }
+table.corr { font-size: 12px; }
+table.corr td, table.corr th { text-align: center; min-width: 0; padding: 7px 6px; }
+#eq-tickers { grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); }
+#eq-tickers .val { font-size: 19px; }
+table.corr td:first-child, table.corr th:first-child { text-align: left; min-width: 56px; }
+td.up { color: var(--good); } td.down { color: var(--bad); }
+td .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent-ink); vertical-align: middle; margin-right: 6px; opacity: .8; }
+/* categorical series (dataviz reference palette, fixed per market) */
+:root { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948; } }
+:root[data-theme="light"] { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 </style>
 
 <header class="nav">
   <div class="wrap">
     <span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="name">PENSION PLANNER</span></span>
+    <nav class="views" aria-label="Pages"><a href="#retirement" data-view="retire">Retirement</a><a href="#equities" data-view="equities">Equities</a><a href="#commodities" data-view="commodities">Commodities</a></nav>
     <nav class="links" aria-label="Sections">
-      <a href="#sec-board">Board</a><a href="#sec-outcomes">Outcomes</a><a href="#sec-backtest">Backtest</a><a href="#sec-pots">Pot size</a><a href="#sec-gilts">Gilts</a><a href="#sec-detail" data-tab="annuities">Annuities</a><a href="#sec-detail" data-tab="method">Method</a>
+      <a href="#sec-board" data-in="retire">Board</a><a href="#sec-outcomes" data-in="retire">Outcomes</a><a href="#sec-backtest" data-in="retire">Backtest</a><a href="#sec-pots" data-in="retire">Pot size</a><a href="#sec-gilts" data-in="retire">Gilts</a><a href="#sec-detail" data-tab="annuities" data-in="retire">Annuities</a><a href="#sec-detail" data-tab="method" data-in="retire">Method</a>
+      <a href="#eq-growth" data-in="equities" hidden>Growth</a><a href="#eq-stats" data-in="equities" hidden>Record</a><a href="#eq-ai" data-in="equities" hidden>AI exposure</a><a href="#eq-outlook" data-in="equities" hidden>Outlook</a><a href="#eq-mix" data-in="equities" hidden>Mix</a>
+      <a href="#co-long" data-in="commodities" hidden>Gold history</a><a href="#co-growth" data-in="commodities" hidden>Growth</a><a href="#co-crisis" data-in="commodities" hidden>In a crash</a><a href="#co-outlook" data-in="commodities" hidden>Outlook</a><a href="#co-how" data-in="commodities" hidden>Holding</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://claude.ai/artifact/Cju7XctP7MUPxtmkppJGGu" target="_blank" rel="noopener" class="ext">Hub</a><a href="https://github.com/spridgehub/pension-planner" target="_blank" rel="noopener" class="ext">Code</a>
     </nav>
@@ -197,7 +222,7 @@ ul.src { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12.5
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap view" id="view-retire">
   <section class="strip" id="tickers" aria-label="Market today"></section>
   <p class="verdict" id="verdict"></p>
 
@@ -366,13 +391,16 @@ ul.src { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12.5
   </div>
 </main>
 
+<!--MARKETS-->
+
 <footer class="foot">
   <div class="wrap">
     <p><strong>Information, not advice.</strong> For free, impartial guidance from age 50, book a Pension Wise appointment through <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/pension-wise" target="_blank" rel="noopener">MoneyHelper</a>. A regulated adviser can recommend what suits you.</p>
-    <p>Part of <a href="https://github.com/spridgehub" target="_blank" rel="noopener">spridgehub</a>. Market data from the Bank of England and ONS; history from the Macrohistory Database; life tables from ONS.</p>
+    <p>Part of <a href="https://github.com/spridgehub" target="_blank" rel="noopener">spridgehub</a>. Market data from the Bank of England and ONS; history from the Macrohistory Database; life tables from ONS. Index and commodity prices from Yahoo Finance; S&amp;P 500 history and CAPE from Robert Shiller; valuations from Siblis Research.</p>
   </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>/*ENGINE*/</script>
 <script>/*APP*/</script>
+<script>/*MARKETSJS*/</script>
