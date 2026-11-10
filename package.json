@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "calibrate": "node scripts/calibrate.js",
     "cli": "node cli.js",
     "build:web": "node scripts/build-web.js",

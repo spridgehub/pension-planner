@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.age.outputs.stale == '1'
         with:
-          node-version: 22
+          node-version: 24
       - name: Refresh, check, test, build
         if: steps.age.outputs.stale == '1'
         run: |
