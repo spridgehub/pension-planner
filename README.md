@@ -89,6 +89,25 @@ Engine: `src/markets.js` (`series`, `stats`, `rolling`, `beta`, `aiStress`, `pro
 UI: `web/markets.html` and `web/markets.js`, injected by `scripts/build-web.js`.
 Dividends: true total return for the S&P 500; elsewhere the index's typical yield is added.
 
+## Keeping it live
+
+- **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`
+  fetches BoE/ONS and market data, runs `scripts/check-data.js` and the tests, publishes with
+  `~/bin/ship`, then waits until the live site serves the new `docs/build.txt`. If anything fails, the
+  last good version stays live and an ntfy alert is sent (and a "fixed" one when it recovers).
+  A run that happens during Citrix work hours commits but holds the push until the next run.
+- **Research figures roll forward daily.** Valuations (CAPE, P/E) are scaled by each index's price
+  move since the reading, and AI-company weights by each company's price relative to its index
+  (Yahoo closes on each `asOf` date, stored in `assets.json` `live`).
+- **Monthly** (launchd `com.spridge.pension-planner.research`, 1st at 05:15): `scripts/research.sh`
+  runs headless Claude with `scripts/research-prompt.md` to re-research
+  `data/markets-research.json` from published sources. It may edit only that file and the result
+  must pass `check-data.js research`, or last month's file is restored. Summary in `logs/`.
+- **Backup**: `.github/workflows/backup-refresh.yml` checks the live build twice a day and, only if it
+  is over 36 hours old, refreshes the market data on GitHub's servers and pushes.
+- The page footer says when prices and research were last updated, and a banner appears if prices
+  are over 3 days old or research over 75 days.
+
 ## Simplifications
 
 - Tax: rUK only (no Scottish rates). Inheritance tax on pensions from April 2027 is not modelled; legacy figures are gross.

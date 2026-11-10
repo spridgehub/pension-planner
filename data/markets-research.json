@@ -385,31 +385,36 @@
         "house": "J.P. Morgan",
         "view": "$6,200 to $6,300 by late 2027",
         "mid": 6250,
-        "asOf": "Jul 2026"
+        "asOf": "2026-07-20",
+        "src": "https://channel8.com/english/news/61694"
       },
       {
         "house": "Goldman Sachs",
         "view": "about $5,600",
         "mid": 5600,
-        "asOf": "Jul 2026"
+        "asOf": "2026-07-20",
+        "src": "https://channel8.com/english/news/61694"
       },
       {
         "house": "UBS",
-        "view": "$5,200 by June 2027, possible dip to $3,850 first",
-        "mid": 5200,
-        "asOf": "2026"
+        "view": "$5,400 by September 2027",
+        "mid": 5400,
+        "asOf": "2026-11-02",
+        "src": "https://www.canadianminingreport.com/blog/gold-price-prediction-ubs-sticks-to-5-400-target-for-2027-as-reuters-survey-sees-4-650"
       },
       {
         "house": "Bank of America",
         "view": "$5,000 to $6,000 ($8,000 in an extreme case)",
         "mid": 5500,
-        "asOf": "Jul 2026"
+        "asOf": "2026-07-20",
+        "src": "https://channel8.com/english/news/61694"
       },
       {
         "house": "HSBC",
         "view": "$4,925",
         "mid": 4925,
-        "asOf": "Jul 2026"
+        "asOf": "2026-07-20",
+        "src": "https://channel8.com/english/news/61694"
       }
     ],
     "goldForecastsSrc": "https://channel8.com/english/news/61694"

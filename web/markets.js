@@ -373,10 +373,10 @@
     const g = E.latestPrice('gold'), fxNow = g.local / g.gbp;
     const fs = cr.goldForecasts;
     $('tbl-cof').innerHTML = '<thead><tr><th>Bank</th><th>View</th><th>Mid, $</th><th>Mid, £/oz</th><th>vs today</th></tr></thead><tbody>'
-      + fs.map((f) => `<tr><td>${esc(f.house)}<span class="gloss">${esc(f.asOf)}</span></td><td style="font-family:var(--font-ui);white-space:normal">${esc(f.view)}</td><td>${usd(f.mid)}</td><td>${gbp(f.mid / fxNow)}</td><td class="${f.mid >= g.local ? 'up' : 'down'}">${spc(f.mid / g.local - 1, 0)}</td></tr>`).join('') + '</tbody>';
+      + fs.map((f) => `<tr><td>${f.src ? `<a href="${f.src}" target="_blank" rel="noopener">${esc(f.house)}</a>` : esc(f.house)}<span class="gloss">${esc(dmy(f.asOf))}</span></td><td style="font-family:var(--font-ui);white-space:normal">${esc(f.view)}</td><td>${usd(f.mid)}</td><td>${gbp(f.mid / fxNow)}</td><td class="${f.mid >= g.local ? 'up' : 'down'}">${spc(f.mid / g.local - 1, 0)}</td></tr>`).join('') + '</tbody>';
     const lo = Math.min(...fs.map((f) => f.mid)), hi = Math.max(...fs.map((f) => f.mid));
     $('coo-h').textContent = `Banks expect gold of ${usd(lo)} to ${usd(hi)} by 2027, ${pc(lo / g.local - 1, 0)} to ${pc(hi / g.local - 1, 0)} above today's ${usd(g.local)}. Forecasters were bullish at the 2011 peak too`;
-    $('cof-note').innerHTML = `${esc(cr.centralBanks.text)} <a href="${cr.centralBanks.src}" target="_blank" rel="noopener">World Gold Council</a>. Bank views as reported in July 2026 (<a href="${cr.goldForecastsSrc}" target="_blank" rel="noopener">source</a>); pounds at today's rate of $${fxNow.toFixed(3)}. J.P. Morgan's long-run assumption for gold is ${pc(R.forecasts[0].values.gold)} a year in dollars.`;
+    $('cof-note').innerHTML = `${esc(cr.centralBanks.text)} <a href="${cr.centralBanks.src}" target="_blank" rel="noopener">World Gold Council</a>. Bank views with the date each was reported; pounds at today's rate of $${fxNow.toFixed(3)}. J.P. Morgan's long-run assumption for gold is ${pc(R.forecasts[0].values.gold)} a year in dollars.`;
     $('co-drivers').innerHTML = [
       ['Real interest rates', 'Gold pays nothing, so it shines when cash and bonds pay little after inflation, and struggles when real yields rise (2013, 2022). That link weakened after 2022 as central banks bought regardless.'],
       ['Central banks', `Since sanctions froze Russia's reserves in 2022, central banks have bought about 1,000 tonnes a year, twice the old pace. Their ${cr.centralBanks.t2025} tonnes in 2025 underpinned the rally; a slowdown is the main risk.`],
@@ -529,7 +529,7 @@
     $('mkf-wrap').hidden = !rows.length;
     $('tbl-mkf').innerHTML = `<thead><tr><th>House forecast for ${{ us: 'US shares', uk: 'UK shares', japan: 'Japanese shares', em: 'emerging markets', gold: 'gold', commodities: 'commodities' }[k]}</th><th>Per year</th><th>Horizon</th><th>Basis</th></tr></thead><tbody>`
       + rows.map((f) => `<tr><td><a href="${f.src}" target="_blank" rel="noopener">${esc(f.house)}</a><span class="gloss">${esc(f.asOf)}</span></td><td class="${f.values[k] < 0 ? 'down' : ''}">${pc(f.values[k])}</td><td>${esc(f.horizon)}</td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(f.basis)}</td></tr>`).join('')
-      + (id === 'gold' ? R.commodities.goldForecasts.map((f) => `<tr><td>${esc(f.house)} (price target)<span class="gloss">${esc(f.asOf)}</span></td><td>${spc(f.mid / E.latestPrice('gold').local - 1, 0)} total</td><td>to 2027</td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(f.view)}</td></tr>`).join('') : '') + '</tbody>';
+      + (id === 'gold' ? R.commodities.goldForecasts.map((f) => `<tr><td>${esc(f.house)} (price target)<span class="gloss">${esc(dmy(f.asOf))}</span></td><td>${spc(f.mid / E.latestPrice('gold').local - 1, 0)} total</td><td>to 2027</td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(f.view)}</td></tr>`).join('') : '') + '</tbody>';
   }
 
   // ================= router =================

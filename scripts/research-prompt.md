@@ -23,7 +23,9 @@ verify, and update each figure's `asOf` (YYYY-MM-DD, the date the source's numbe
    Research Affiliates, GMO, BlackRock if extractable). Annual returns as fractions; keep "basis"
    (currency, nominal or real) accurate.
 5. commodities: gold and silver record highs (price and date), latest World Gold Council central-bank
-   buying (update the "text" sentence), and current bank gold price forecasts with a numeric "mid".
+   buying (update the "text" sentence), and current bank gold price forecasts: each entry has house,
+   view (plain words incl. target date), numeric "mid" in $, asOf (YYYY-MM-DD it was reported) and src.
+   Replace an entry only with a newer view from the same or another major bank; keep 4 to 6 entries.
 6. aiContext: refresh the hyperscaler capex sentence and keep 2 to 3 recent official warnings
    (IMF, Bank of England, others) with dates and sources.
 7. User-facing text: plain English, no en or em dashes (write "x to y" for ranges).
