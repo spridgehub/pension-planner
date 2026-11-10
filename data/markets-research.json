@@ -1,5 +1,5 @@
 {
-  "retrieved": "2026-11-09",
+  "retrieved": "2026-11-10",
   "note": "Hand-entered from published sources. Weights and valuations move daily; refresh by hand. Valuations use Siblis Research on one date (30 Sep 2026) so markets compare like for like.",
   "valuation": {
     "spx": {
@@ -9,7 +9,7 @@
       "divYield": 0.011,
       "asOf": "2026-09-30",
       "src": "https://siblisresearch.com/search/cape",
-      "alt": "multpl.com CAPE 38.9 on 6 Nov 2026"
+      "alt": "multpl.com CAPE 39.85 on 9 Nov 2026"
     },
     "ndx": {
       "cape": null,
@@ -210,19 +210,21 @@
       ]
     },
     "kospi": {
-      "weight": 0.409,
+      "weight": 0.5,
       "names": "Samsung Electronics, SK Hynix (memory chips for AI)",
-      "extra": "34% at end of 2025; some mid-2026 estimates 45 to 48%",
-      "asOf": "2026-04-15",
-      "src": "https://en.fnnews.com/news/202604151825494221",
+      "extra": "Korea Exchange average for 19 to 23 Oct 2026; 34% at end of 2025, peak about 56% in June 2026, about 46.5% on 6 Nov 2026",
+      "asOf": "2026-10-23",
+      "src": "https://finance.biggo.com/news/53179954-7047-4833-aceb-0db4b45fedbb",
       "constituents": [
         {
-          "tickers": [
-            "005930.KS",
-            "000660.KS"
-          ],
-          "name": "Samsung Electronics and SK Hynix (split not published in the source, moved as an equal basket)",
-          "weight": 0.409
+          "ticker": "005930.KS",
+          "name": "Samsung Electronics (27.3% common plus 2.9% preferred shares)",
+          "weight": 0.302
+        },
+        {
+          "ticker": "000660.KS",
+          "name": "SK Hynix",
+          "weight": 0.198
         }
       ]
     },
@@ -251,16 +253,16 @@
       ]
     },
     "taiex": {
-      "weight": 0.443,
+      "weight": 0.41,
       "names": "TSMC alone",
-      "extra": "Makes most of the world's AI chips",
-      "asOf": "2026-04-24",
-      "src": "https://focustaiwan.tw/business/202604240013",
+      "extra": "Makes most of the world's AI chips; about 41% of the index on 5 Oct 2026 (45% at its February peak)",
+      "asOf": "2026-10-05",
+      "src": "https://www.taipeitimes.com/News/biz/archives/2026/10/06/2003865447",
       "constituents": [
         {
           "ticker": "2330.TW",
           "name": "TSMC",
-          "weight": 0.443
+          "weight": 0.41
         }
       ]
     },
@@ -272,7 +274,7 @@
     }
   },
   "aiContext": {
-    "capex": "Amazon, Alphabet, Meta and Microsoft (with SpaceX) are expected to spend about $800bn to $830bn on capital spending in 2026, mostly AI data centres, and all signal more in 2027.",
+    "capex": "After their October 2026 results, Amazon, Alphabet, Meta and Microsoft (with SpaceX) are expected to spend $803bn to $828bn on capital spending in 2026, mostly AI data centres. Amazon and Alphabet say they will spend more in 2027; Microsoft trimmed its 2026 figure to about $170bn because of data centre delays.",
     "capexSrc": "https://www.hl.co.uk/news/ai-hyperscalers-are-expected-to-finish-the-year-spending-a-whopping-828-billion-on-capex",
     "warnings": [
       {
@@ -283,9 +285,9 @@
       },
       {
         "who": "Bank of England, Financial Policy Committee",
-        "date": "2025 to 2026",
-        "text": "Valuations look especially stretched for AI-focused firms; a correction would spill over to the UK.",
-        "src": "https://fortune.com/2025/10/08/bank-of-england-ai-mania-equity-valuations-stretched-dotcom-bubble/"
+        "date": "Sep 2026",
+        "text": "AI company valuations fell sharply in July, made worse by investors unwinding borrowed bets, and the risk of a sharper correction spilling into core markets remains.",
+        "src": "https://www.bankofengland.co.uk/financial-policy-committee-record/2026/september-2026"
       }
     ]
   },
