@@ -1,0 +1,49 @@
+# Backup for the Mac mini's twice-daily refresh (scripts/daily.sh). Twice a day this checks how old
+# the live build is; only if it is over 36 hours old (the mini is down or its job is failing) does it
+# refresh the market data here, check it, test, rebuild and push. Research figures are untouched.
+name: Backup data refresh
+on:
+  schedule:
+    - cron: '50 9,22 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Refresh even if the live site is fresh'
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency: backup-refresh
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: How old is the live build?
+        id: age
+        run: |
+          stamp=$(curl -s -m 20 "https://spridgehub.github.io/pension-planner/build.txt" | cut -d' ' -f1)
+          age=$(( ( $(date +%s) - $(date -d "${stamp:-1970-01-01}" +%s) ) / 3600 ))
+          echo "live build $stamp, ${age}h old"
+          if [ "$age" -ge 36 ] || [ "${{ inputs.force }}" = "true" ]; then echo "stale=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.age.outputs.stale == '1'
+      - uses: actions/setup-node@v4
+        if: steps.age.outputs.stale == '1'
+        with:
+          node-version: 22
+      - name: Refresh, check, test, build
+        if: steps.age.outputs.stale == '1'
+        run: |
+          node scripts/fetch-market.js || echo "BoE/ONS fetch failed, keeping previous"
+          node scripts/fetch-assets.js
+          node scripts/check-data.js
+          npm test
+          node scripts/build-web.js
+      - name: Push
+        if: steps.age.outputs.stale == '1'
+        run: |
+          git config user.name "pension-planner backup"
+          git config user.email "actions@users.noreply.github.com"
+          git add data docs
+          git commit -m "Backup data refresh $(date -u '+%Y-%m-%d %H:%M') (Mac mini refresh missing)" || exit 0
+          git push

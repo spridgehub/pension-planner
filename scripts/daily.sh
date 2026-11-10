@@ -33,7 +33,11 @@ PY
 }
 fail() { echo "FAILED: $1"; git checkout -q -- data/ docs/ dist/ 2>/dev/null; alert fail "$1"; exit 1; }
 
-git pull -q --rebase origin main 2>/dev/null || echo "pull skipped"
+# The GitHub backup workflow may have pushed data while the mini was down: merge it, keeping ours
+# for the generated files (they are regenerated below anyway).
+if git fetch -q origin main 2>/dev/null && ! git merge-base --is-ancestor origin/main HEAD; then
+  git merge -q -X ours origin/main -m "Merge backup refresh" || { git merge --abort; fail "could not merge GitHub changes"; }
+fi
 
 problems=""
 node scripts/fetch-market.js || problems="$problems BoE/ONS fetch;"
