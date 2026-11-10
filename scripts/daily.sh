@@ -43,6 +43,11 @@ stale=$(node -e "const a=JSON.parse(require('fs').readFileSync('data/assets.json
 node scripts/check-data.js || fail "data check failed:$problems (kept yesterday's data live)"
 npm test --silent >/tmp/pension-planner-test.log 2>&1 || fail "tests failed after refresh, see /tmp/pension-planner-test.log"
 
+# Runs are timed outside Citrix hours; a catch-up run during a work day commits but holds the push.
+if [ -x ~/bin/workhold ] && ~/bin/workhold -q; then
+  ~/bin/ship . --hold -m "Data refresh $(date '+%Y-%m-%d %H:%M')" || fail "commit (ship --hold) failed"
+  echo "work hours: push held until the next run"; exit 0
+fi
 ~/bin/ship . -m "Data refresh $(date '+%Y-%m-%d %H:%M')" || fail "publish (ship) failed"
 
 want=$(cat docs/build.txt)
