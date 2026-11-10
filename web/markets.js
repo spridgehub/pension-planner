@@ -11,6 +11,7 @@
   const gbpk = (v) => (v == null || !isFinite(v) ? 'n/a' : Math.abs(v) >= 1e6 ? '£' + (v / 1e6).toFixed(2) + 'm' : Math.abs(v) >= 1e3 ? '£' + Math.round(v / 1000) + 'k' : gbp(v));
   const usd = (v, d = 0) => (v == null || !isFinite(v) ? 'n/a' : '$' + v.toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d }));
   const mshort = (m) => new Date(m + '-01T12:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }).replace('Sept', 'Sep');
+  const dmy = (d) => (d && /^\d{4}-\d{2}-\d{2}/.test(d) ? new Date(d.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : d || '');
   const mon = (m) => new Date(m + '-01T12:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
   const yrs = (months) => (months == null ? 'n/a' : months < 12 ? `${months} mo` : `${(months / 12).toFixed(months < 60 ? 1 : 0)} yr`);
   const rgba = (color, a) => {
@@ -113,11 +114,11 @@
     const o = { ccy: e.ccy, real: e.real };
     // tickers
     marketTiles('eq-tickers', EQ);
-    const v = R.valuation;
+    const v = E.VALUATION_NOW;
     const s10 = Object.fromEntries(EQ.map((id) => [id, E.stats(E.series(id), E.addMonths(LAST, -120))]));
-    const ai = R.aiConcentration;
+    const ai = E.AI_NOW;
     $('eq-verdict').innerHTML = `Over ten years in pounds the US led (S&amp;P 500 ${pc(s10.spx.cagr)} a year, Nasdaq-100 ${pc(s10.ndx.cagr)}) against ${pc(s10.ftse.cagr)} for the FTSE 100. Most of that lead came from a handful of AI-linked giants, now ${pc(ai.spx.weight, 0)} of the S&amp;P 500, and US shares now cost ${v.spx.cape.toFixed(0)} times average earnings (CAPE) against ${v.ftse.cape.toFixed(0)} in the UK.`
-      + `<small>Prices from Yahoo Finance to ${mon(LAST)}; valuations from Siblis Research, ${new Date(v.spx.asOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}. Past returns do not predict future returns.</small>`;
+      + `<small>Prices from Yahoo Finance to ${mon(LAST)}; valuations and AI weights from published research (Siblis Research ${dmy(v.spx.asOf)}; index holdings), rolled forward daily with prices. Past returns do not predict future returns.</small>`;
 
     seg('eq-pick', EQ.map((id) => [id, esc(name(id)), col(id)]), e.pick, (id) => { e.pick = e.pick.includes(id) ? e.pick.filter((x) => x !== id) : EQ.filter((x) => x === id || e.pick.includes(x)); if (!e.pick.length) e.pick = [id]; save(); renderEquities(); }, true);
     seg('eq-from', fromItems(['1985-01', '1990-01', '2000-01', '2010-01', E.addMonths(LAST, -120), E.addMonths(LAST, -60)]), e.from, (m) => { e.from = m; save(); renderEquities(); });
@@ -166,14 +167,14 @@
   }
 
   function renderAI() {
-    const e = S.eq, ai = R.aiConcentration, shock = -e.shock;
+    const e = S.eq, ai = E.AI_NOW, shock = -e.shock;
     $('eqa-val').textContent = pc(e.shock, 0);
     const rows = EQ.map((id) => ({ id, s: E.aiStress(id, shock), ep: Object.fromEntries(E.EPISODES.map((x) => [x.id, E.episodeReturn(id, x)])) }));
     const worst = [...rows].sort((a, b) => a.s.history - b.s.history);
     $('eqa-h').textContent = `${name(worst[0].id)} and ${name(worst[1].id)} are the most tied to AI chip stocks; the ${name(worst[worst.length - 1].id)} and ${name(worst[worst.length - 2].id)} the least`;
     $('eqa-sub').textContent = R.aiContext.capex + ' That spending is what the market is paying for; if it slows or fails to earn a return, the names below take the hit.';
     $('tbl-eqa').innerHTML = '<thead><tr><th>Market</th><th>AI names weight</th><th>Which</th><th>Moves with chips</th><th>Dot-com bust</th><th>2022</th><th>DeepSeek, tariffs</th><th>If AI falls ' + pc(e.shock, 0) + '</th></tr></thead><tbody>'
-      + rows.map(({ id, s, ep }) => `<tr><td><span class="name">${esc(name(id))}</span><span class="gloss">${esc(ai[id]?.extra || '')}</span></td><td>${s.weight != null ? `<span class="bar" style="width:${Math.round(s.weight * 120)}px"></span>${pc(s.weight, 0)}` : 'n/a'}</td><td style="white-space:normal;text-align:left;font-family:var(--font-ui);font-size:12px;color:var(--ink-3);min-width:180px">${esc(ai[id]?.names || '')}</td><td title="Beta to SOX in pounds, 10 years; ${pc(s.r2, 0)} of monthly swings shared">${s.beta.toFixed(2)}<span class="gloss">${pc(s.r2, 0)} shared</span></td>`
+      + rows.map(({ id, s, ep }) => `<tr><td><span class="name">${esc(name(id))}</span><span class="gloss">${esc(ai[id]?.extra || '')}</span></td><td>${s.weight != null ? `<span class="bar" style="width:${Math.round(s.weight * 120)}px"></span>${pc(s.weight, 0)}${ai[id]?.live ? `<span class="gloss">${pc(ai[id].base, 0)} on ${dmy(ai[id].asOf)}</span>` : ai[id]?.asOf ? `<span class="gloss">${dmy(ai[id].asOf)}</span>` : ''}` : 'n/a'}</td><td style="white-space:normal;text-align:left;font-family:var(--font-ui);font-size:12px;color:var(--ink-3);min-width:180px">${esc(ai[id]?.names || '')}</td><td title="Beta to SOX in pounds, 10 years; ${pc(s.r2, 0)} of monthly swings shared">${s.beta.toFixed(2)}<span class="gloss">${pc(s.r2, 0)} shared</span></td>`
         + ['dotcom', 'rates', 'tariffs'].map((k) => `<td class="${ep[k] == null ? '' : ep[k] < 0 ? 'down' : 'up'}">${ep[k] == null ? 'n/a' : spc(ep[k], 0)}</td>`).join('')
         + `<td class="down">${s.direct != null ? `${pc(s.direct, 0)} to ` : ''}${pc(s.history, 0)}</td></tr>`).join('') + '</tbody>';
     const blue = css('--accent-ink'), grey = css('--grey');
@@ -187,11 +188,11 @@
   }
 
   function renderOutlook() {
-    const e = S.eq, v = R.valuation;
+    const e = S.eq, v = E.VALUATION_NOW;
     const rows = EQ.map((id) => ({ id, v: v[id], imp: E.valuationReturn(id), past: E.stats(E.series(id, { real: true }), E.addMonths(LAST, -120)) }));
     $('tbl-eqv').innerHTML = '<thead><tr><th>Market</th><th>CAPE</th><th>Forward P/E</th><th>Implied real return</th><th>Last 10 yrs real, £</th></tr></thead><tbody>'
       + rows.map((r) => `<tr><td><span class="name">${esc(name(r.id))}</span>${r.v?.basis ? `<span class="gloss">${esc(r.v.basis)}</span>` : ''}</td><td>${r.v?.cape?.toFixed(1) ?? 'n/a'}</td><td>${r.v?.fwdPe?.toFixed(1) ?? 'n/a'}</td><td>${r.imp ? pc(r.imp.real) + (r.imp.basis !== 'CAPE' ? ' *' : '') : 'n/a'}</td><td>${pc(r.past?.cagr)}</td></tr>`).join('')
-      + '</tbody><tfoot><tr><td colspan="5" style="font-size:12px;color:var(--ink-3);white-space:normal">* No CAPE is published for the Nasdaq-100, so 1 / trailing P/E is used. Implied returns are in local currency; currency moves come on top.</td></tr></tfoot>';
+      + `</tbody><tfoot><tr><td colspan="5" style="font-size:12px;color:var(--ink-3);white-space:normal">Readings from Siblis Research on ${dmy(v.spx.asOf)}, rolled forward to today with each index's price (a ratio's earnings base moves slowly). * No CAPE is published for the Nasdaq-100, so 1 / trailing P/E is used. Implied returns are in local currency; currency moves come on top.</td></tr></tfoot>`;
     const us = rows[0].imp.real, uk = rows[2].imp.real;
     $('eqo-h').textContent = `Today's prices point to lower US returns than the last decade: about ${pc(us)} a year after inflation for the S&P 500 against ${pc(uk)} for the UK, if valuations hold their link with later returns`;
 
@@ -449,13 +450,13 @@
 
     // risks panel
     if (isEq) {
-      const ai = R.aiConcentration[id], st = E.aiStress(id, -0.4), v = R.valuation[id], imp = E.valuationReturn(id);
+      const ai = E.AI_NOW[id], st = E.aiStress(id, -0.4), v = E.VALUATION_NOW[id], imp = E.valuationReturn(id);
       $('mkr-lbl').textContent = 'AI exposure and valuation';
       $('mkr-h').textContent = ai?.weight != null ? `${pc(ai.weight, 0)} sits in AI-linked companies; a 40% fall in AI stocks would mean roughly ${st.direct != null ? pc(-st.direct, 0) + ' to ' : ''}${pc(-st.history, 0)} off this index` : `No AI hardware names; a 40% fall in chip stocks has meant about ${pc(-st.history, 0)} here`;
       $('mkr-figs').innerHTML = [
-        ['AI names', ai?.weight != null ? pc(ai.weight, 0) : 'n/a', ai?.asOf ? `as of ${ai.asOf}` : ''],
+        ['AI names', ai?.weight != null ? pc(ai.weight, 0) : 'n/a', ai?.live ? `today, est. (${pc(ai.base, 0)} on ${dmy(ai.asOf)})` : ai?.asOf ? `as of ${dmy(ai.asOf)}` : ''],
         ['Moves with chips', st.beta.toFixed(2), `${pc(st.r2, 0)} of swings shared`],
-        ['CAPE', v?.cape?.toFixed(1) ?? 'n/a', `forward P/E ${v?.fwdPe?.toFixed(1) ?? 'n/a'}`],
+        ['CAPE', v?.cape?.toFixed(1) ?? 'n/a', `forward P/E ${v?.fwdPe?.toFixed(1) ?? 'n/a'}${v?.live ? `; today, est. from ${dmy(v.asOf)}` : ''}`],
         ['Implied real return', imp ? pc(imp.real) : 'n/a', imp ? `1 / ${imp.basis}, a year` : ''],
       ].map(([l, vv, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${vv}</span><span class="sub">${sub}</span></div>`).join('');
       $('mkr-notes').innerHTML = `<div class="note"><h3>${esc(ai?.names || '')}</h3><p>${esc(ai?.extra || '')}${ai?.src ? ` <a href="${ai.src}" target="_blank" rel="noopener">Source</a>` : ''}</p></div>`
@@ -571,6 +572,18 @@
   const rerender = () => { for (const k of Object.keys(rendered)) rendered[k] = false; show(viewFor(location.hash), location.hash.slice(1), false); };
   try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', rerender); } catch (e) { /* old browsers */ }
   new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Data freshness: updated automatically twice a day; say so plainly if that stops.
+  (function stamp() {
+    const D = E.DATA_STAMP, when = (iso) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const ageDays = (Date.now() - new Date(D.prices)) / 864e5;
+    const rAge = D.research ? (Date.now() - new Date(D.research)) / 864e5 : 999;
+    $('data-stamp').textContent = `Market prices updated ${when(D.prices)} (automatically, twice a day). Research figures (valuations, AI weights, forecasts) last checked ${D.research ? new Date(D.research).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'n/a'}, refreshed monthly, and rolled forward with prices in between.${D.stale.length ? ` Not refreshed in the last run: ${D.stale.join(', ')}.` : ''}`;
+    if (ageDays > 3 || rAge > 75) {
+      $('stale-banner').hidden = false;
+      $('stale-banner').textContent = ageDays > 3 ? `Market prices on this page were last updated ${when(D.prices)}. The automatic update looks to have stopped, so figures may be out of date.` : `The research figures (valuations, AI weights, forecasts) were last checked ${Math.round(rAge)} days ago; prices are current.`;
+    }
+  })();
 
   const first = viewFor(location.hash);
   show(first, location.hash.slice(1), first !== 'retire');

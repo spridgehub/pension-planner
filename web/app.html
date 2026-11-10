@@ -200,6 +200,7 @@ table.corr td, table.corr th { text-align: center; min-width: 0; padding: 7px 6p
 table.corr td:first-child, table.corr th:first-child { text-align: left; min-width: 56px; }
 td.up { color: var(--good); } td.down { color: var(--bad); }
 td .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent-ink); vertical-align: middle; margin-right: 6px; opacity: .8; }
+.stale { margin-top: 14px; padding: 10px 14px; border-radius: 8px; background: var(--caution-bg); color: var(--ink-1); font-size: 13px; }
 /* market tiles and single-market page */
 .pick-lbl { font: 600 14px/1.4 var(--font-ui); color: var(--ink-1); margin-bottom: -8px; }
 .pick-lbl::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); margin-right: 8px; vertical-align: 1px; }
@@ -247,6 +248,7 @@ a.cell.tile .lbl { padding-right: 14px; }
   </div>
 </header>
 
+<div class="wrap stale" id="stale-banner" role="status" hidden></div>
 <main class="wrap view" id="view-retire">
   <section class="strip" id="tickers" aria-label="Market today"></section>
   <p class="verdict" id="verdict"></p>
@@ -421,6 +423,7 @@ a.cell.tile .lbl { padding-right: 14px; }
 <footer class="foot">
   <div class="wrap">
     <p><strong>Information, not advice.</strong> For free, impartial guidance from age 50, book a Pension Wise appointment through <a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/pension-wise" target="_blank" rel="noopener">MoneyHelper</a>. A regulated adviser can recommend what suits you.</p>
+    <p id="data-stamp"></p>
     <p>Part of <a href="https://github.com/spridgehub" target="_blank" rel="noopener">spridgehub</a>. Market data from the Bank of England and ONS; history from the Macrohistory Database; life tables from ONS. Index and commodity prices from Yahoo Finance; S&amp;P 500 history and CAPE from Robert Shiller; valuations from Siblis Research.</p>
   </div>
 </footer>

@@ -24,4 +24,7 @@ writeFileSync(root + 'docs/index.html', '<!doctype html><html lang="en-GB"><head
   + '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>'
   + '</head><body>' + html + '</body></html>\n');
 writeFileSync(root + 'docs/.nojekyll', '');
+// Build stamp: the daily job checks the live site serves this exact line.
+const assetsMeta = JSON.parse(readFileSync(root + 'data/assets.json', 'utf8'));
+writeFileSync(root + 'docs/build.txt', `${new Date().toISOString()} prices ${assetsMeta.fetched}\n`);
 console.log('docs/index.html (GitHub Pages)');

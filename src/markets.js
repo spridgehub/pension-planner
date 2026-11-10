@@ -10,6 +10,43 @@ export const MARKETS = assets;
 export const RESEARCH = research;
 export const ASSETS = Object.fromEntries(assets.assets.map((a) => [a.id, a]));
 
+// ---------- research figures rolled forward with prices ----------
+// A valuation ratio moves almost one for one with the index price between readings (earnings change
+// slowly), and a company's weight in an index moves with its price relative to the index (exact for
+// both size-weighted and price-weighted indices, until the next rebalance). So each figure from
+// data/markets-research.json is carried from its date to today with Yahoo closes in assets.live.
+const live = assets.live ?? { quotes: {}, at: {} };
+const ratio = (ticker, date) => {
+  const base = live.at[`${ticker}@${date}`], now = live.quotes[ticker]?.now;
+  return base && now ? now / base : null;
+};
+const symbolOf = (id) => assets.assets.find((a) => a.id === id)?.symbol;
+function rollValuation(id, v) {
+  if (!v || !v.asOf) return v;
+  const r = ratio(symbolOf(id), v.asOf);
+  if (r == null) return { ...v, live: false };
+  const k = (x) => (x == null ? x : x * r);
+  return { ...v, base: { cape: v.cape, pe: v.pe, fwdPe: v.fwdPe, divYield: v.divYield }, cape: k(v.cape), pe: k(v.pe), fwdPe: k(v.fwdPe), divYield: v.divYield == null ? null : v.divYield / r, move: r - 1, live: true, liveTo: live.quotes[symbolOf(id)]?.time };
+}
+function rollAI(id, c) {
+  if (!c?.constituents || !c.asOf) return c;
+  const ri = ratio(symbolOf(id), c.asOf);
+  if (ri == null) return { ...c, live: false };
+  let w = 0, ok = true;
+  const parts = c.constituents.map((x) => {
+    const rs = (x.tickers ?? [x.ticker]).map((t) => ratio(t, c.asOf));
+    if (rs.some((r) => r == null)) { ok = false; return { ...x }; }
+    const r = rs.reduce((s2, v) => s2 + v, 0) / rs.length;
+    const now = x.weight * r / ri;
+    w += now;
+    return { ...x, base: x.weight, weight: now };
+  });
+  return ok ? { ...c, base: c.weight, weight: w, constituents: parts, live: true, liveTo: live.quotes[symbolOf(id)]?.time } : { ...c, live: false };
+}
+export const VALUATION_NOW = Object.fromEntries(Object.entries(research.valuation ?? {}).map(([id, v]) => [id, rollValuation(id, v)]));
+export const AI_NOW = Object.fromEntries(Object.entries(research.aiConcentration ?? {}).map(([id, c]) => [id, rollAI(id, c)]));
+export const DATA_STAMP = { prices: assets.fetched, research: research.retrieved, stale: assets.stale ?? [] };
+
 const monthIndex = (m) => { const [y, mo] = m.split('-').map(Number); return y * 12 + mo - 1; };
 const monthKey = (i) => `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}`;
 export const addMonths = (m, n) => monthKey(monthIndex(m) + n);
@@ -155,7 +192,7 @@ export function episodeReturn(id, ep, opts = {}) {
 //   history: the index's 10-year beta to US chip stocks (SOX, in pounds) times the shock, which
 //   captures knock-on selling and suppliers but also anything else that moved with chips.
 export function aiStress(id, shock) {
-  const w = research.aiConcentration?.[id]?.weight ?? null;
+  const w = AI_NOW[id]?.weight ?? null;
   const b = beta(id, 'sox', { years: 10 });
   return { weight: w, direct: w != null ? w * shock : null, history: b.beta * shock, beta: b.beta, r2: b.r2 };
 }
@@ -163,7 +200,7 @@ export function aiStress(id, shock) {
 // Valuation-implied long-run real return: the cyclically adjusted earnings yield (1 / CAPE),
 // a well-tested if rough guide to the next 10 years of real returns in local currency.
 export function valuationReturn(id) {
-  const v = research.valuation?.[id];
+  const v = VALUATION_NOW[id];
   if (!v) return null;
   const pe = v.cape ?? v.pe;
   return pe ? { real: 1 / pe, basis: v.cape ? 'CAPE' : 'P/E', pe } : null;

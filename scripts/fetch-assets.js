@@ -7,7 +7,7 @@
 //   Shiller's S&P 500 data (datahub mirror): price, dividends and CAPE monthly since 1871.
 //   Gold monthly average since 1833 (datahub mirror of World Bank / Bundesbank data).
 // Run with `npm run refresh:assets` (or `npm run refresh`, which does everything).
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (Macintosh) pension-planner/0.3' };
 const get = async (url, kind = 'text') => {
@@ -129,9 +129,19 @@ for (const [c, s] of Object.entries({ USD: 'GBPUSD=X', JPY: 'GBPJPY=X', HKD: 'GB
 }
 
 const months = (from) => { const out = []; let [y, m] = from.split('-').map(Number); const end = ym(new Date()); for (;;) { const k = `${y}-${String(m).padStart(2, '0')}`; if (k > end) break; out.push(k); m++; if (m > 12) { m = 1; y++; } } return out; };
+// Last good file: if one Yahoo series fails, keep its previous data rather than drop the asset.
+const prevPath = new URL('../data/assets.json', import.meta.url);
+const prev = existsSync(prevPath) ? JSON.parse(readFileSync(prevPath)) : null;
+const stale = [];
 const assets = [];
 for (const a of ASSETS) {
-  const y = await yahoo(a.symbol, a.group === 'commodity' ? '1d' : '1mo');
+  let y;
+  try { y = await yahoo(a.symbol, a.group === 'commodity' ? '1d' : '1mo'); } catch (e) {
+    const old = prev?.assets.find((x) => x.id === a.id);
+    if (!old) throw e;
+    console.error(`\n${a.id}: ${e.message}; keeping data to ${old.last?.time?.slice(0, 10)}`);
+    stale.push(a.id); assets.push(old); continue;
+  }
   let px = y.months, start = Object.keys(px).sort()[0], note = null;
   if (a.id === 'gold') {
     // Long monthly averages before the futures series; futures month-ends after.
@@ -163,6 +173,38 @@ for (const a of ASSETS) {
   process.stdout.write(`${a.id} ${first} (${dense.length}, ${dense.length - Object.keys(px).length} filled)  `);
 }
 
+// Live roll-forward inputs: the close on (or just before) each research date, and the latest price,
+// for every index and AI-linked company named in data/markets-research.json.
+const research = JSON.parse(readFileSync(new URL('../data/markets-research.json', import.meta.url)));
+const want = {};   // ticker -> set of dates
+const need = (t, d) => { if (t && d && /^\d{4}-\d{2}-\d{2}$/.test(d)) (want[t] ??= new Set()).add(d); };
+for (const a of ASSETS.filter((x) => x.group === 'equity')) {
+  need(a.symbol, research.valuation?.[a.id]?.asOf);
+  const ai = research.aiConcentration?.[a.id];
+  if (ai?.constituents) { need(a.symbol, ai.asOf); for (const c of ai.constituents) for (const t of c.tickers ?? [c.ticker]) need(t, ai.asOf); }
+}
+async function daily(symbol, fromDate) {
+  const p1 = Math.floor(new Date(fromDate + 'T00:00:00Z') / 1000) - 14 * 86400;
+  const d = await get(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?period1=${p1}&period2=9999999999&interval=1d`, 'json');
+  const r = d.chart.result[0], off = r.meta.gmtoffset ?? 0, close = r.indicators.quote[0].close;
+  const days = r.timestamp.map((t, i) => [new Date((t + off + 43200) * 1000).toISOString().slice(0, 10), close[i]]).filter(([, c]) => c != null);
+  return { days, now: r.meta.regularMarketPrice ?? days[days.length - 1][1], nowTime: new Date(r.meta.regularMarketTime * 1000).toISOString() };
+}
+const live = { fetched: new Date().toISOString(), quotes: {}, at: {} };
+for (const [t, dates] of Object.entries(want)) {
+  const ds = [...dates].sort();
+  try {
+    const q = await daily(t, ds[0]);
+    live.quotes[t] = { now: q.now, time: q.nowTime };
+    for (const dt of ds) { const hit = [...q.days].reverse().find(([day]) => day <= dt); if (hit) live.at[`${t}@${dt}`] = hit[1]; }
+  } catch (e) {
+    console.error(`live ${t}: ${e.message}; keeping previous`);
+    if (prev?.live?.quotes?.[t]) live.quotes[t] = prev.live.quotes[t];
+    for (const dt of ds) if (prev?.live?.at?.[`${t}@${dt}`] != null) live.at[`${t}@${dt}`] = prev.live.at[`${t}@${dt}`];
+    stale.push(t);
+  }
+}
+
 const series = (obj, from) => { const ks = months(from); return ks.map((k) => (obj[k] != null ? +obj[k].toPrecision(6) : null)); };
 // Yahoo's early FX history is patchy: start after the last gap longer than two months, then carry
 // a rate forward over any single missing month.
@@ -189,6 +231,8 @@ const out = {
   fx: Object.fromEntries(Object.entries(fx).filter(([, v]) => v).map(([c, v]) => [c, fxClean(series(v, fxFirst[c]), fxFirst[c])])),
   cpi: { first: '1900-01', v: series(cpi, '1900-01') },
   cape: { first: '1881-01', v: series(sh.cape, '1881-01') },
+  live,
+  stale,
 };
 writeFileSync(new URL('../data/assets.json', import.meta.url), JSON.stringify(out) + '\n');
-console.log(`\nassets.json ${(JSON.stringify(out).length / 1024).toFixed(0)} KB`);
+console.log(`\nassets.json ${(JSON.stringify(out).length / 1024).toFixed(0)} KB; live quotes ${Object.keys(live.quotes).length}${stale.length ? `; STALE: ${stale.join(', ')}` : ''}`);
