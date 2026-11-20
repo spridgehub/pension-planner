@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-20T06:20:06.375Z",
+ "fetched": "2026-11-20T21:30:02.997Z",
  "sources": {
   "boe": "Bank of England Statistical Interactive Database (IUDBEDR, IUDMNZC, IUDLNZC, IUDLRZC, IUDLIZC)",
   "ons": "ONS CPI annual rate 00: all items (D7G7)"
@@ -7,23 +7,23 @@
  "latest": {
   "bankRate": {
    "value": 0.04,
-   "date": "2026-11-18"
+   "date": "2026-11-19"
   },
   "gilt10": {
-   "value": 0.053746999999999996,
-   "date": "2026-11-17"
+   "value": 0.052894,
+   "date": "2026-11-18"
   },
   "gilt20": {
-   "value": 0.058644999999999996,
-   "date": "2026-11-17"
+   "value": 0.057819,
+   "date": "2026-11-18"
   },
   "real20": {
-   "value": 0.026378,
-   "date": "2026-11-17"
+   "value": 0.025672,
+   "date": "2026-11-18"
   },
   "implied20": {
-   "value": 0.032267000000000004,
-   "date": "2026-11-17"
+   "value": 0.032146,
+   "date": "2026-11-18"
   },
   "cpi": {
    "value": 0.036000000000000004,
@@ -880,10 +880,10 @@
   {
    "month": "2026-11",
    "bankRate": 0.04,
-   "gilt10": 0.053746999999999996,
-   "gilt20": 0.058644999999999996,
-   "real20": 0.026378,
-   "implied20": 0.032267000000000004,
+   "gilt10": 0.052894,
+   "gilt20": 0.057819,
+   "real20": 0.025672,
+   "implied20": 0.032146,
    "cpi": null
   }
  ]
