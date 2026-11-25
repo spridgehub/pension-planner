@@ -205,6 +205,32 @@ for (const [t, dates] of Object.entries(want)) {
   }
 }
 
+// Tech stocks page: five years of daily closes (US-listed, in dollars) for the big AI and software
+// names, aligned on S&P 500 trading days. A stock that fails keeps its previous series.
+const STOCKS = [
+  ['NVDA', 'Nvidia', 'AI chips'], ['AVGO', 'Broadcom', 'AI chips'], ['AMD', 'AMD', 'AI chips'], ['TSM', 'TSMC', 'AI chips'],
+  ['MSFT', 'Microsoft', 'Cloud giants'], ['GOOGL', 'Alphabet', 'Cloud giants'], ['AMZN', 'Amazon', 'Cloud giants'], ['META', 'Meta', 'Cloud giants'], ['ORCL', 'Oracle', 'Cloud giants'],
+  ['AAPL', 'Apple', 'Devices and cars'], ['TSLA', 'Tesla', 'Devices and cars'],
+  ['TEAM', 'Atlassian', 'Software'], ['CRM', 'Salesforce', 'Software'], ['NOW', 'ServiceNow', 'Software'], ['ADBE', 'Adobe', 'Software'], ['PLTR', 'Palantir', 'Software'],
+  ['^NDX', 'Nasdaq-100', 'Benchmark'], ['^GSPC', 'S&P 500', 'Benchmark'],
+];
+const p5y = new Date(); p5y.setUTCFullYear(p5y.getUTCFullYear() - 5); p5y.setUTCDate(p5y.getUTCDate() - 7);
+const fromIso = p5y.toISOString().slice(0, 10);
+const stockData = {};
+for (const [sym] of STOCKS) {
+  try { stockData[sym] = await daily(sym, fromIso); } catch (e) { console.error(`stock ${sym}: ${e.message}`); stale.push(sym); }
+}
+const calendar = (stockData['^GSPC']?.days ?? []).map(([d]) => d);
+const stocks = calendar.length > 1000 ? {
+  dates: calendar,
+  list: STOCKS.map(([symbol, name, group]) => {
+    const q = stockData[symbol];
+    if (!q) { const old = prev?.stocks?.list?.find((x) => x.symbol === symbol); return old && prev.stocks.dates.at(-1) === calendar.at(-1) ? old : null; }
+    const map = new Map(q.days); let last = null;
+    return { symbol, name, group, now: q.now, time: q.nowTime, px: calendar.map((d) => { const v = map.get(d); if (v != null) last = +v.toPrecision(5); return last; }) };
+  }).filter(Boolean),
+} : prev?.stocks ?? null;
+
 const series = (obj, from) => { const ks = months(from); return ks.map((k) => (obj[k] != null ? +obj[k].toPrecision(6) : null)); };
 // Yahoo's early FX history is patchy: start after the last gap longer than two months, then carry
 // a rate forward over any single missing month.
@@ -232,6 +258,7 @@ const out = {
   cpi: { first: '1900-01', v: series(cpi, '1900-01') },
   cape: { first: '1881-01', v: series(sh.cape, '1881-01') },
   live,
+  stocks,
   stale,
 };
 writeFileSync(new URL('../data/assets.json', import.meta.url), JSON.stringify(out) + '\n');

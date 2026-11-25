@@ -46,6 +46,32 @@ async function ons() {
   return { latest: months[months.length - 1], months };
 }
 
+// Month-end 5, 10 and 20-year nominal zero-coupon gilt yields since 1985, for the gilt calculator's
+// ranges (how far yields have moved over each length of time). Kept as is if the fetch fails.
+async function yieldHistory() {
+  const codes = { IUDSNZC: 'y5', IUDMNZC: 'y10', IUDLNZC: 'y20' };
+  const url = 'https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/1985&Dateto=now'
+    + `&SeriesCodes=${Object.keys(codes).join(',')}&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N`;
+  const res = await fetch(url, { headers: UA });
+  if (!res.ok) throw new Error(`BoE yields ${res.status}`);
+  const [head, ...lines] = (await res.text()).trim().split(/\r?\n/);
+  const cols = head.split(',').slice(1).map((c) => codes[c]);
+  const byMonth = {};
+  for (const l of lines) {
+    const v = l.split(',');
+    const m = new Date(v[0] + ' UTC').toISOString().slice(0, 7);
+    const row = (byMonth[m] ??= {});
+    cols.forEach((c, i) => { const x = parseFloat(v[i + 1]); if (isFinite(x)) row[c] = +(x / 100).toFixed(6); });
+  }
+  const months = Object.keys(byMonth).sort();
+  if (months.length < 400) throw new Error('BoE yields: too little history');
+  const out = { fetched: new Date().toISOString(), source: 'Bank of England nominal zero-coupon yields, month-end (IUDSNZC, IUDMNZC, IUDLNZC)', first: months[0],
+    y5: months.map((m) => byMonth[m].y5 ?? null), y10: months.map((m) => byMonth[m].y10 ?? null), y20: months.map((m) => byMonth[m].y20 ?? null) };
+  writeFileSync(new URL('../data/gilt-yields.json', import.meta.url), JSON.stringify(out) + '\n');
+  console.log(`gilt-yields ${months[0]}..${months[months.length - 1]}`);
+}
+try { await yieldHistory(); } catch (e) { console.error(`yield history: ${e.message}; keeping previous`); }
+
 const [b, c] = await Promise.all([boe(), ons()]);
 const out = {
   fetched: new Date().toISOString(),

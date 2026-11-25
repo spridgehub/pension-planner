@@ -533,13 +533,14 @@
   }
 
   // ================= router =================
-  const VIEWS = { retire: 'view-retire', equities: 'view-equities', commodities: 'view-commodities', market: 'view-market' };
+  const VIEWS = { retire: 'view-retire', equities: 'view-equities', commodities: 'view-commodities', market: 'view-market', tech: 'view-tech' };
   const rendered = {};
   function viewFor(hash) {
     const h = (hash || '').replace('#', '');
     if (h === 'equities' || h.startsWith('eq-')) return 'equities';
     if (h === 'commodities' || h.startsWith('co-')) return 'commodities';
     if (h.startsWith('m-') && A[h.slice(2)]) return 'market';
+    if (h === 'tech' || h.startsWith('t-') || h.startsWith('tech-')) return 'tech';
     return 'retire';
   }
   function show(view, scrollTo, nav = true) {
@@ -548,6 +549,14 @@
     const navView = view === 'market' ? (EQ.includes(mid) ? 'equities' : 'commodities') : view;
     document.querySelectorAll('.views a').forEach((a) => (a.dataset.view === navView ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
     document.querySelectorAll('.links a[data-in]').forEach((a) => { a.hidden = a.dataset.in !== navView; });
+    if (view === 'tech') {
+      try { window.TechView.render((scrollTo || '').startsWith('t-') ? scrollTo.slice(2) : null); } catch (err) { console.error(err); }
+      document.title = 'Tech stocks · Pension Planner';
+      if (!nav) return;
+      const tgt = scrollTo && scrollTo.startsWith('t-') ? $('tech-spot') : scrollTo && $(scrollTo);
+      if (tgt && scrollTo !== 'tech') tgt.scrollIntoView(); else window.scrollTo(0, 0);
+      return;
+    }
     if (view === 'market') {
       try { renderMarket(mid); } catch (err) { console.error(err); }
       if (nav) window.scrollTo(0, 0);

@@ -9,7 +9,8 @@
 // and the personal savings allowance (£1,000 basic, £500 higher, £0 additional). The gain from
 // buying below 100 and holding to redemption is free of Capital Gains Tax. So low-coupon gilts
 // suit capital growth, and high-coupon gilts suit income that fits inside those allowances.
-import gilts from '../data/gilts-2026-10-24.json' with { type: 'json' };
+import gilts from '../data/gilts.json' with { type: 'json' };
+import yieldHist from '../data/gilt-yields.json' with { type: 'json' };
 import { TAX_2026 } from './tax.js';
 
 export const GILTS = gilts.gilts.map((g) => ({ ...g, ticker: g.ticker ?? g.name.replace('Treasury ', 'T ') }));
@@ -185,3 +186,69 @@ export function giltAfterTax(g, marginalRate, settle = settlementDate()) {
   return { ...g, years: h.years, grossYield: h.yield, netYield: h.netYield, grossEquivalent: h.netYield / (1 - marginalRate),
     taxFreeShareOfReturn: Math.max(0, gain / (gain + coupons)) };
 }
+
+// ---------- volatility ranges ----------
+// How far gilt yields have moved over each length of time, from Bank of England month-end
+// zero-coupon yields since 1985. The average drift is removed (yields fell for most of that period),
+// so the ranges are symmetric: a measure of how much yields swing, not a forecast of direction.
+export const YIELD_HISTORY = yieldHist;
+const TENORS = [[5, 'y5'], [10, 'y10'], [20, 'y20']];
+function moveSdFor(key, k, lookbackYears) {
+  const x = yieldHist[key], n = x.length, from = Math.max(0, n - 1 - Math.round(lookbackYears * 12));
+  const ch = [];
+  for (let i = from; i + k < n; i++) if (x[i] != null && x[i + k] != null) ch.push(x[i + k] - x[i]);
+  if (ch.length < 24) return null;
+  const m = ch.reduce((a, b) => a + b, 0) / ch.length;
+  return Math.sqrt(ch.reduce((a, b) => a + (b - m) ** 2, 0) / (ch.length - 1));
+}
+// Typical (one standard deviation) yield move over `months`, for one benchmark maturity. When the
+// look-back is too short to measure long horizons directly, the shorter-horizon figure is scaled
+// by the shape seen over the full history.
+const sdCache = new Map();
+function tenorSd(key, months, lookbackYears) {
+  const ck = `${key}|${months}|${lookbackYears}`;
+  if (sdCache.has(ck)) return sdCache.get(ck);
+  let v = moveSdFor(key, months, lookbackYears);
+  if (v == null) {
+    let k = months;
+    while (k > 1 && moveSdFor(key, k, lookbackYears) == null) k = Math.floor(k * 0.75);
+    const base = moveSdFor(key, k, lookbackYears), fullK = moveSdFor(key, k, 99), fullM = moveSdFor(key, months, 99);
+    v = base != null && fullK && fullM ? base * fullM / fullK : null;
+  }
+  sdCache.set(ck, v);
+  return v;
+}
+export function yieldMoveSd(tenorYears, months, lookbackYears = 10) {
+  if (months <= 0) return 0;
+  const t = Math.min(20, Math.max(5, tenorYears));
+  const i = t <= 10 ? 0 : 1;
+  const [t0, k0] = TENORS[i], [t1, k1] = TENORS[i + 1];
+  const a = tenorSd(k0, months, lookbackYears), b = tenorSd(k1, months, lookbackYears);
+  if (a == null || b == null) return a ?? b ?? null;
+  return a + (b - a) * (t - t0) / (t1 - t0);
+}
+export const YIELD_MOVE_PERIODS = [[1, '1 month'], [3, '3 months'], [6, '6 months'], [12, '1 year'], [24, '2 years'], [60, '5 years']];
+export function yieldMoveTable(lookbackYears = 10) {
+  return TENORS.map(([t]) => ({ tenor: t, moves: YIELD_MOVE_PERIODS.map(([k]) => yieldMoveSd(t, k, lookbackYears)) }));
+}
+
+// Capital value bands over the life of a holding: at each date, the clean value if the yield had
+// moved by one or two typical moves for that much elapsed time (using the gilt's remaining maturity
+// then), plus the net interest received by that date. One move either side covers about 2 in 3
+// outcomes, two moves about 19 in 20, if moves are roughly normal.
+function bandPoint(h, t, lookbackYears) {
+  const g = h.gilt, s = d(h.settle), mat = d(g.maturity);
+  const atMat = t >= mat;
+  const years = (Math.min(t, mat) - s) / (365.25 * DAY), left = Math.max(0, (mat - t) / (365.25 * DAY));
+  const sd = atMat ? 0 : yieldMoveSd(left, Math.round(years * 12), lookbackYears) ?? 0;
+  const val = (dy) => (atMat ? h.nominal : h.nominal * cleanPrice(g, h.yield + dy, t) / 100);
+  const income = h.flows.filter((f) => d(f.date) <= t).reduce((a, f) => a + f.net, 0);
+  return { date: iso(atMat ? mat : t), years, sd, base: val(0), hi1: val(-sd), lo1: val(sd), hi2: val(-2 * sd), lo2: val(2 * sd), income };
+}
+export function volBands(h, { lookbackYears = 10, points = 48 } = {}) {
+  const s = d(h.settle), mat = d(h.gilt.maturity);
+  const out = [];
+  for (let i = 0; i <= points; i++) out.push(bandPoint(h, new Date(s.getTime() + (mat - s) * i / points), lookbackYears));
+  return out;
+}
+export const bandAt = (h, dateIso, { lookbackYears = 10 } = {}) => bandPoint(h, d(dateIso), lookbackYears);

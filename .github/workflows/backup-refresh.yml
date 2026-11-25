@@ -35,6 +35,7 @@ jobs:
         if: steps.age.outputs.stale == '1'
         run: |
           node scripts/fetch-market.js || echo "BoE/ONS fetch failed, keeping previous"
+          node scripts/fetch-gilts.js || echo "gilt prices fetch failed, keeping previous"
           node scripts/fetch-assets.js
           node scripts/check-data.js
           npm test

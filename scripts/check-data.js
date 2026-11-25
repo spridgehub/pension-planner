@@ -75,6 +75,15 @@ function checkAssets() {
   if (a.stale?.length) warn(`not refreshed this run, kept previous: ${a.stale.join(', ')}`);
   const live = a.live?.quotes ?? {};
   if (Object.keys(live).length < 15) err(`only ${Object.keys(live).length} live quotes`);
+  const st = a.stocks;
+  if (!st || st.list.length < 15) err(`tech stocks: ${st?.list.length ?? 0} series`);
+  else {
+    if (daysAgo(st.dates.at(-1)) > 6) err(`tech stocks last close ${st.dates.at(-1)}`);
+    for (const x of st.list) if (x.px.length !== st.dates.length || !(x.px.at(-1) > 0)) err(`tech stock ${x.symbol}: bad series`);
+  }
+  let gl;
+  try { gl = read('data/gilts.json'); if (gl.gilts.length < 40) err(`gilts: only ${gl.gilts.length}`); if (daysAgo(gl.asOf) > 8) warn(`gilt prices from ${gl.asOf}`); } catch (e) { err(`gilts.json: ${e.message}`); }
+  try { const gy = read('data/gilt-yields.json'); if (gy.y10.length < 480) err('gilt-yields: too short'); } catch (e) { err(`gilt-yields.json: ${e.message}`); }
   let m;
   try { m = read('data/market-now.json'); if (daysAgo(m.fetched) > 4) err(`market-now.json fetched ${m.fetched}`); } catch (e) { err(`market-now.json: ${e.message}`); }
 }

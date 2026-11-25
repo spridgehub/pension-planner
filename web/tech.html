@@ -1,0 +1,63 @@
+<!-- Tech stocks view. Injected into app.html by scripts/build-web.js. -->
+<main class="wrap view" id="view-tech" hidden>
+  <p class="pick-lbl">The big AI and software stocks, in dollars. Pick one for its spotlight below.</p>
+  <nav class="strip tiles" id="tech-tiles" aria-label="Tech stocks"></nav>
+  <p class="verdict" id="tech-verdict"></p>
+
+  <div class="grid">
+    <section class="panel" id="tech-spot" aria-labelledby="ts-name">
+      <div class="mk-title">
+        <span class="mk-sw" id="ts-sw"></span>
+        <div><span class="section-lbl" id="ts-kind"></span><h2 id="ts-name" style="font:750 26px/1.1 var(--font-ui)"></h2></div>
+        <div class="mk-price"><span class="val" id="ts-price"></span><span class="sub" id="ts-price-sub"></span></div>
+      </div>
+      <p class="verdict" id="ts-verdict" style="font-size:15px"></p>
+      <div class="strip" id="ts-figs"></div>
+      <div class="grid">
+        <div class="s7 gpane">
+          <span class="lbl">Last 12 months and the range its volatility implies for the next 12</span>
+          <div class="key" id="ts-key"></div>
+          <div class="chart tall"><canvas id="ch-ts" aria-label="Price over the last 12 months with a forward range"></canvas></div>
+        </div>
+        <div class="s5 gpane">
+          <span class="lbl">Volatility over each look-back period</span>
+          <div class="chart sm"><canvas id="ch-tsvol" aria-label="Annualised volatility by look-back period"></canvas></div>
+          <div class="tbl"><table id="tbl-tsrange"></table></div>
+          <p class="subtitle" id="ts-about"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="tech-12m" aria-labelledby="t12-h">
+      <span class="section-lbl">Last 12 months<span>price, rebased to 100, in dollars</span></span>
+      <h2 class="headline" id="t12-h"></h2>
+      <div class="ctl"><span class="lbl">Compare (up to 6)</span><div class="seg" id="t12-pick"></div></div>
+      <div class="key" id="t12-key"></div>
+      <div class="chart tall"><canvas id="ch-t12" aria-label="Price over the last 12 months, rebased to 100"></canvas></div>
+    </section>
+
+    <section class="panel" id="tech-months" aria-labelledby="tm-h">
+      <span class="section-lbl">Month by month<span>each calendar month's move, the current month so far</span></span>
+      <h2 class="headline" id="tm-h"></h2>
+      <div class="tbl"><table id="tbl-tm" class="heat"></table></div>
+    </section>
+
+    <section class="panel" id="tech-vol" aria-labelledby="tv-h">
+      <span class="section-lbl">Volatility across periods<span>annualised swings of daily prices over each look-back</span></span>
+      <h2 class="headline" id="tv-h"></h2>
+      <p class="subtitle">Volatility is how much the price typically swings in a year, measured from daily moves. 30% means a typical year lands within about 30% either side of where it started. When the 1-month figure is well above the 1-year one, the stock is in a stormy patch; history says storms pass but cluster.</p>
+      <div class="tbl"><table id="tbl-tv" class="heat"></table></div>
+      <div class="key" id="tvr-key"></div>
+      <div class="chart"><canvas id="ch-tvr" aria-label="Rolling one-month volatility over the last 12 months"></canvas></div>
+    </section>
+
+    <section class="panel" id="tech-range" aria-labelledby="tr-h">
+      <span class="section-lbl">What the swings imply<span>typical ranges ahead from 1-year volatility, no view on direction</span></span>
+      <h2 class="headline" id="tr-h"></h2>
+      <div class="tbl"><table id="tbl-tr"></table></div>
+      <span class="lbl">Reward against risk: 12-month move against 1-year volatility</span>
+      <div class="chart tall"><canvas id="ch-trs" aria-label="12-month return against volatility for each stock"></canvas></div>
+      <p class="subtitle">Ranges assume moves of the size seen over the last year, with no drift: one typical move either side holds about 2 in 3 outcomes, two moves about 19 in 20. "Held" checks the idea against each stock's own past: how often it actually stayed inside its 3-month range, measured with the volatility known at the time (about 68% would mean the yardstick works). Real markets have fatter tails: big jumps on results days happen more often than the bell curve says.</p>
+    </section>
+  </div>
+</main>

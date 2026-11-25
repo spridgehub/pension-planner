@@ -41,6 +41,7 @@ fi
 
 problems=""
 node scripts/fetch-market.js || problems="$problems BoE/ONS fetch;"
+node scripts/fetch-gilts.js || problems="$problems gilt prices fetch;"
 node scripts/fetch-assets.js || problems="$problems market prices fetch;"
 stale=$(node -e "const a=JSON.parse(require('fs').readFileSync('data/assets.json'));process.stdout.write((a.stale||[]).join(', '))")
 [ -n "$stale" ] && problems="$problems Yahoo series kept from last run ($stale);"

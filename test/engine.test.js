@@ -114,14 +114,14 @@ test('live basis moves annuity rates with gilt yields', () => {
 });
 
 test('gilt pricing reproduces quoted yields from clean prices', () => {
-  const settle = E.settlementDate(new Date('2026-10-24T20:00:00Z'));
+  const settle = E.settlementDate(new Date(E.GILT_PRICES_AS_OF + ':00Z'));
   for (const g of E.GILTS.filter((x) => x.maturity > '2027-06-01')) {
     assert.ok(Math.abs(E.yieldFromClean(g, g.price, settle) - g.quotedYield) < 0.0006, `${g.name}`);
   }
 });
 
 test('gilt holding: semi-annual coupons, pull to par, rate moves wash out at maturity', () => {
-  const settle = E.settlementDate(new Date('2026-10-24T20:00:00Z'));
+  const settle = E.settlementDate(new Date(E.GILT_PRICES_AS_OF + ':00Z'));
   const g = E.GILTS.find((x) => x.ticker === 'TG30');
   const h = E.giltHolding(g, 50000, { settle, taxRate: 0.4 });
   close(h.couponEvery6Months, h.nominal * g.coupon / 2, 1e-12);
@@ -142,4 +142,16 @@ test('pensioner savings room: unused allowance + starting rate + PSA', () => {
   close(plan.nominal * g.coupon, plan.total, 1e-9);
   assert.ok(E.taxOnInterest(plan.total, 12548) < 0.01);
   close(E.taxOnInterest(plan.total + 1000, 12548), 200, 1e-6);
+});
+
+test('gilt volatility ranges: widen with time, close at maturity, scale with look-back', () => {
+  const g = E.GILTS.find((x) => x.ticker === 'TG30');
+  const h = E.giltHolding(g, 50000, { taxRate: 0.4 });
+  const b = E.volBands(h, { lookbackYears: 10, points: 12 });
+  assert.equal(b[0].sd, 0);
+  assert.equal(b[12].lo2, h.nominal);
+  assert.ok(b[3].sd > b[1].sd, 'typical move grows with elapsed time');
+  for (const p of b) assert.ok(p.lo2 <= p.lo1 && p.lo1 <= p.base && p.base <= p.hi1 && p.hi1 <= p.hi2);
+  const t = E.yieldMoveTable(40);
+  for (const r of t) assert.ok(r.moves.every((x) => x > 0.001 && x < 0.04), `${r.tenor}y moves in a sane range`);
 });

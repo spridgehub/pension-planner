@@ -89,6 +89,18 @@ Engine: `src/markets.js` (`series`, `stats`, `rolling`, `beta`, `aiStress`, `pro
 UI: `web/markets.html` and `web/markets.js`, injected by `scripts/build-web.js`.
 Dividends: true total return for the S&P 500; elsewhere the index's typical yield is added.
 
+## Tech stocks page and gilt ranges
+
+- `#tech`: Nvidia, Broadcom, AMD, TSMC, Microsoft, Alphabet, Amazon, Meta, Oracle, Apple, Tesla,
+  Atlassian, Salesforce, ServiceNow, Adobe and Palantir against the Nasdaq-100: 12-month moves,
+  month-by-month heatmap, volatility over 1 month to 5 years, rolling volatility, implied ranges
+  (with a check of how often each stock stayed inside them) and a spotlight per stock (`#t-TEAM`).
+  Five years of daily closes in `assets.json` `stocks`; engine in `src/stocks.js`, UI `web/tech.*`.
+- Gilt calculator: ranges from how far BoE zero-coupon yields have moved over each elapsed period
+  (`data/gilt-yields.json`, month-end since 1985; look-back 3 or 10 years or all), using the gilt's
+  remaining maturity at each date; an inflation yardstick (2%, CPI now, or market-implied) and a
+  today's-money view. Gilt prices refresh twice a day from giltcalculator.co.uk (`scripts/fetch-gilts.js`).
+
 ## Keeping it live
 
 - **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`
