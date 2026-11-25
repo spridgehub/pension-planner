@@ -240,7 +240,7 @@ a.cell.tile .lbl { padding-right: 14px; }
     <span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="name">PENSION PLANNER</span></span>
     <nav class="views" aria-label="Pages"><a href="#retirement" data-view="retire">Retirement</a><a href="#equities" data-view="equities">Equities</a><a href="#commodities" data-view="commodities">Commodities</a><a href="#tech" data-view="tech">Tech stocks</a></nav>
     <nav class="links" aria-label="Sections">
-      <a href="#sec-board" data-in="retire">Board</a><a href="#sec-outcomes" data-in="retire">Outcomes</a><a href="#sec-backtest" data-in="retire">Backtest</a><a href="#sec-pots" data-in="retire">Pot size</a><a href="#sec-gilts" data-in="retire">Gilts</a><a href="#sec-detail" data-tab="annuities" data-in="retire">Annuities</a><a href="#sec-detail" data-tab="method" data-in="retire">Method</a>
+      <a href="#sec-board" data-in="retire">Board</a><a href="#sec-outcomes" data-in="retire">Outcomes</a><a href="#sec-backtest" data-in="retire">Backtest</a><a href="#sec-pots" data-in="retire">Pot size</a><a href="#sec-gilts" data-in="retire">Gilts</a><a href="#sec-relief" data-in="retire">Tax relief</a><a href="#sec-detail" data-tab="annuities" data-in="retire">Annuities</a><a href="#sec-detail" data-tab="method" data-in="retire">Method</a>
       <a href="#eq-growth" data-in="equities" hidden>Growth</a><a href="#eq-stats" data-in="equities" hidden>Record</a><a href="#eq-ai" data-in="equities" hidden>AI exposure</a><a href="#eq-outlook" data-in="equities" hidden>Outlook</a><a href="#eq-mix" data-in="equities" hidden>Mix</a>
       <a href="#co-long" data-in="commodities" hidden>Gold history</a><a href="#co-growth" data-in="commodities" hidden>Growth</a><a href="#co-crisis" data-in="commodities" hidden>In a crash</a><a href="#co-outlook" data-in="commodities" hidden>Outlook</a><a href="#co-how" data-in="commodities" hidden>Holding</a>
       <a href="#tech-spot" data-in="tech" hidden>Spotlight</a><a href="#tech-12m" data-in="tech" hidden>12 months</a><a href="#tech-months" data-in="tech" hidden>Month by month</a><a href="#tech-vol" data-in="tech" hidden>Volatility</a><a href="#tech-range" data-in="tech" hidden>Ranges</a>
@@ -368,9 +368,59 @@ a.cell.tile .lbl { padding-right: 14px; }
         <div class="s5 gpane"><div class="key" id="g-key2"></div><div class="chart"><canvas id="ch-gcash" aria-label="Interest paid every six months, after tax"></canvas></div></div>
       </div>
       <details class="yours"><summary id="g-moves-sum">How far gilt yields typically move</summary><div class="tbl" style="margin-top:10px"><table id="tbl-gmoves"></table></div><p class="subtitle" style="margin-top:6px">One typical move (a standard deviation) of Bank of England zero-coupon yields over each period, month-end data, average drift removed. About 2 in 3 moves were smaller than this; about 19 in 20 smaller than twice this.</p></details>
-      <div class="ctl"><span class="lbl">If yields move straight after you buy</span><div class="seg" id="g-shift"></div></div>
+      <div class="controls">
+        <div class="ctl"><span class="lbl">If yields move straight after you buy</span><div class="seg" id="g-shift"></div></div>
+        <label class="f" style="width:170px">Your own move, bp <input id="g-bp" type="number" step="5" min="-500" max="500" placeholder="e.g. 35 or -80"></label>
+        <label class="f" style="width:230px"><span id="g-sell-lbl">Or a value to sell at £</span> <input id="g-sell" type="number" step="100" min="0" placeholder="capital value"></label>
+      </div>
+      <div class="strip" id="g-move"></div>
       <div class="tbl"><table id="tbl-gscen"></table></div>
       <details class="yours"><summary id="g-sched-sum">Every payment, date by date</summary><div class="tbl" style="margin-top:10px"><table id="tbl-gsched"></table></div></details>
+    </section>
+
+    <section class="panel" id="sec-relief" aria-labelledby="r-h">
+      <span class="section-lbl">Pension tax relief<span>2026/27, how much more you can pay in with relief · rest of UK tax rates</span></span>
+      <h2 class="headline" id="r-h"></h2>
+      <p class="subtitle" id="r-sub"></p>
+      <div class="form" style="margin-top:0">
+        <label class="f">Earnings from work £/yr <input id="r-earn" type="number" step="1000" min="0"></label>
+        <label class="f">Other taxable income £/yr <input id="r-other" type="number" step="500" min="0"></label>
+        <label class="f">Your contributions this year, gross £ <input id="r-personal" type="number" step="500" min="0" title="Including the 20% the provider adds; for net pay schemes, the amount deducted from pay"></label>
+        <label class="f">Employer contributions this year £ <input id="r-employer" type="number" step="500" min="0"></label>
+        <label class="f">Salary sacrificed this year £ <input id="r-sac" type="number" step="500" min="0"></label>
+        <label class="f">Child Benefit received £/yr <input id="r-cb" type="number" step="100" min="0" title="0 if none. One child is about £1,370 a year"></label>
+        <label class="check" style="align-self:end"><input id="r-mpaa" type="checkbox"> Already drawn a pension flexibly</label>
+      </div>
+      <details class="yours" id="r-prior-box"><summary>Previous three tax years, for carry forward (starts by assuming you paid in the same as this year: check yours)</summary>
+        <div class="tbl" style="margin-top:10px"><table id="tbl-rprior"></table></div>
+        <p class="subtitle" style="margin-top:6px">Total paid in each year by you (gross) and your employer. Change the allowance if yours was tapered or reduced that year. Untick a year when you were not a member of any registered pension scheme.</p>
+      </details>
+      <div class="strip" id="r-kpis"></div>
+      <div class="callouts" id="r-traps"></div>
+      <div class="controls">
+        <div class="ctl"><span class="lbl">Pay more in as</span><div class="seg" id="r-method"><button type="button" data-v="personal">Personal contribution</button><button type="button" data-v="sacrifice">Salary sacrifice</button></div></div>
+        <label class="f" style="min-width:260px;flex:1;max-width:520px">Extra to pay in this year <span class="num" id="r-try-val"></span><input id="r-try" type="range" min="0" step="500"></label>
+        <label class="f" style="width:150px">Or type £ <input id="r-try-num" type="number" step="100" min="0"></label>
+      </div>
+      <div class="strip" id="r-result"></div>
+      <div class="grid">
+        <div class="s7 gpane">
+          <span class="lbl">Tax relief on each slice of extra contribution</span>
+          <div class="key" id="r-key"></div>
+          <div class="chart"><canvas id="ch-relief" aria-label="Tax relief rate on each slice of extra pension contribution"></canvas></div>
+        </div>
+        <div class="s5 gpane">
+          <span class="lbl" id="r-alt-h">If you have hit your limits</span>
+          <div class="notes" id="r-alts"></div>
+        </div>
+      </div>
+      <ul class="src">
+        <li><a href="https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief" target="_blank" rel="noopener">GOV.UK: tax relief on pension contributions</a></li>
+        <li><a href="https://www.gov.uk/tax-on-your-private-pension/annual-allowance" target="_blank" rel="noopener">GOV.UK: annual allowance, tapering and carry forward</a></li>
+        <li><a href="https://www.tax.service.gov.uk/pension-annual-allowance-calculator" target="_blank" rel="noopener">HMRC: check if you have unused annual allowance</a></li>
+        <li><a href="https://www.gov.uk/claim-tax-relief/pension-contributions" target="_blank" rel="noopener">GOV.UK: claim higher-rate relief on pension contributions</a></li>
+        <li><a href="https://www.moneyhelper.org.uk/en/pensions-and-retirement/tax-and-pensions/tax-relief-and-your-pension" target="_blank" rel="noopener">MoneyHelper: tax relief and your pension</a></li>
+      </ul>
     </section>
 
     <section class="panel" id="sec-detail" aria-label="Detail">

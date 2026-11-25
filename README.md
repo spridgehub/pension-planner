@@ -101,6 +101,18 @@ Dividends: true total return for the S&P 500; elsewhere the index's typical yiel
   remaining maturity at each date; an inflation yardstick (2%, CPI now, or market-implied) and a
   today's-money view. Gilt prices refresh twice a day from giltcalculator.co.uk (`scripts/fetch-gilts.js`).
 
+## Pension tax relief calculator
+
+`#sec-relief` on the Retirement page (`src/relief.js`, `web/relief.js`): from earnings, other income,
+contributions so far (personal, employer, salary sacrifice), Child Benefit and the last three years'
+inputs, it works out the 2026/27 annual allowance (taper, MPAA), carry forward, the 100%-of-earnings
+cap, the largest extra contribution with relief, tax and NI saved, the relief rate on each slice, and
+flags the personal allowance (£100k to £125,140) and Child Benefit (£60k to £80k) traps. Links to
+GOV.UK, HMRC and MoneyHelper, and alternatives once pension room runs out. rUK tax only.
+
+The gilt calculator also takes any yield move in bp, or a value to sell at on the look-ahead date
+(worked back to the yield move it needs).
+
 ## Keeping it live
 
 - **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`

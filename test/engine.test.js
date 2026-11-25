@@ -155,3 +155,17 @@ test('gilt volatility ranges: widen with time, close at maturity, scale with loo
   const t = E.yieldMoveTable(40);
   for (const r of t) assert.ok(r.moves.every((x) => x > 0.001 && x < 0.04), `${r.tenor}y moves in a sane range`);
 });
+
+test('pension relief: allowance traps, taper, carry forward, earnings cap', () => {
+  const pa = E.reliefPosition({ earnings: 110000 });
+  assert.equal(Math.round(pa.paTrap), 10000);
+  assert.ok(Math.abs(pa.saving(10000).taxSaved - 6000) < 1, '60% relief restoring the personal allowance');
+  const hi = { earnings: 300000, employer: 20000, prior: [{ used: 20000 }, { used: 60000 }, { used: 10000 }] };
+  const ras = E.reliefPosition(hi), sac = E.reliefPosition({ ...hi, method: 'sacrifice' });
+  assert.equal(ras.now.aa, 30000);
+  assert.equal(ras.carry, 90000);
+  assert.equal(ras.maxRelieved, 130000, 'personal contributions lift the taper by cutting threshold income');
+  assert.equal(sac.maxRelieved, 100000, 'salary sacrifice does not');
+  assert.equal(E.reliefPosition({ earnings: 0, otherIncome: 20000 }).maxRelieved, 3600);
+  assert.equal(E.reliefPosition({ earnings: 80000, mpaa: true, employer: 4000 }).maxRelieved, 6000);
+});

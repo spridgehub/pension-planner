@@ -494,7 +494,29 @@
       .sort((a, b) => a.maturity.localeCompare(b.maturity));
   }
   function setupGilts(keep) {
-    document.querySelectorAll('#g-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === G.mode)));
+    $('g-bp').addEventListener('input', () => {
+    const v = parseFloat($('g-bp').value);
+    if (!isFinite(v)) return;
+    G.shift = Math.max(-500, Math.min(500, Math.round(v))); $('g-sell').value = '';
+    clearTimeout(G.t); G.t = setTimeout(renderGilts, 250);
+  });
+  // A capital value to sell at on the look-ahead date: work back to the yield move it needs.
+  $('g-sell').addEventListener('input', () => {
+    const v = parseFloat($('g-sell').value), g = giltByName($('g-gilt').value);
+    if (!(v > 0) || !g) return;
+    clearTimeout(G.t); G.t = setTimeout(() => {
+      const h = E.giltHolding(g, Math.max(1000, num('g-amount')), { settle: E.settlementDate(new Date()) });
+      const hz = $('g-horizon').value;
+      if (hz >= g.maturity) return;
+      const clean = v / h.nominal * 100;
+      const y = E.yieldFromClean(g, clean, new Date(hz + 'T12:00:00Z'));
+      if (!isFinite(y)) return;
+      G.shift = Math.max(-500, Math.min(500, Math.round((y - h.yield) * 1e4)));
+      $('g-bp').value = G.shift;
+      renderGilts();
+    }, 300);
+  });
+  document.querySelectorAll('#g-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === G.mode)));
     document.querySelectorAll('.g-growth').forEach((el) => { el.hidden = G.mode !== 'growth'; });
     document.querySelectorAll('.g-income').forEach((el) => { el.hidden = G.mode !== 'income'; });
     const prev = $('g-gilt').value, list = giltList();
@@ -648,9 +670,21 @@
 
     // yield moves
     $('g-shift').innerHTML = G_SHIFTS.map((bp) => `<button type="button" data-bp="${bp}" aria-pressed="${G.shift === bp}">${bpLabel(bp)}</button>`).join('');
-    $('g-shift').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { G.shift = +b.dataset.bp; renderGilts(); }));
-    const sc = E.rateScenarios(h, horizon, G_SHIFTS);
+    $('g-shift').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { G.shift = +b.dataset.bp; $('g-bp').value = ''; $('g-sell').value = ''; renderGilts(); }));
+    const shifts = [...new Set([...G_SHIFTS, G.shift])].sort((x, y) => x - y);
+    const sc = E.rateScenarios(h, horizon, shifts);
     const hz = fmtDate(horizon, true);
+    // the chosen move, in pounds and per cent
+    const ch = sc.find((r) => r.bp === G.shift), base = sc.find((r) => r.bp === 0);
+    $('g-sell-lbl').textContent = `Or a value to sell at on ${fmtDate(horizon, true)} £`;
+    $('g-move').innerHTML = [
+      ['Yield move', bpLabel(G.shift), `${pc(h.yield, 2)} to ${pc(ch.yield, 2)}`],
+      ['Value straight after', gbp(ch.valueNow), `${ch.changeNow >= 0 ? '+' : '−'}${gbp(Math.abs(ch.changeNow))} (${(ch.changeNow / (h.nominal * g.price / 100) * 100).toFixed(1)}%)`],
+      [`Capital on ${hz}`, gbp(ch.capital), `${ch.capital - base.capital >= 0 ? '+' : '−'}${gbp(Math.abs(ch.capital - base.capital))} vs no change`],
+      ['Total by then', gbp(ch.total), `with ${gbp(ch.income)} interest after tax`],
+      ['Return a year', pc(ch.annualised, 2), infl != null ? `${pc((1 + ch.annualised) / (1 + infl) - 1, 2)} after inflation` : `no change: ${pc(base.annualised, 2)}`],
+      ['Rule of thumb', `${(h.duration).toFixed(1)}% per 100bp`, 'duration: value change for a 1% yield move'],
+    ].map(([l, v, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${v}</span><span class="sub">${sub}</span></div>`).join('');
     $('tbl-gscen').innerHTML = `<thead><tr><th>Yields move</th><th>New yield</th><th>Value straight after</th><th>Capital on ${hz}</th><th>Interest by then, after tax</th><th>Total</th><th>Return a year</th>${infl != null ? `<th>After ${pc(infl, 1)} inflation</th>` : ''}</tr></thead><tbody>${sc.map((r) => `<tr class="${r.bp === G.shift ? 'hit' : ''}"><td>${bpLabel(r.bp)}</td><td>${pc(r.yield, 2)}</td><td>${gbp(r.valueNow)} <span class="gloss" style="display:inline">${Math.abs(r.changeNow) < 0.5 ? '±£0' : (r.changeNow > 0 ? '+' : '−') + gbp(Math.abs(r.changeNow))}</span></td><td>${gbp(r.capital)}</td><td>${gbp(r.income)}</td><td><b>${gbp(r.total)}</b></td><td>${pc(r.annualised, 2)}</td>${infl != null ? `<td class="${r.annualised < infl ? 'down' : ''}">${pc((1 + r.annualised) / (1 + infl) - 1, 2)}</td>` : ''}</tr>`).join('')}</tbody>`;
 
     // schedule
