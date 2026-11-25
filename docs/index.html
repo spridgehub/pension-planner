@@ -1637,7 +1637,7 @@ a.cell.tile.is-down { box-shadow: inset 3px 0 0 var(--bad), 1px 0 0 var(--rule),
     $('tech-tiles').innerHTML = ALL.map((s) => {
       const st = ST[s];
       const up = st.r12m >= 0;
-      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}, ${spc(st.r12m)} over 12 months"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="moves">${chg(st.r12m)} <span class="per">12 mo</span></span><span class="sub">1 mo ${chg(st.r1m)} · vol ${pc(st.vols[252])}</span>${sparkSvg(E.stock(s).px.slice(-Y), up ? css('--good') : css('--bad'))}</a>`;
+      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}, ${spc(st.r12m)} over 12 months"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="moves">${chg(st.r12m)} <span class="per">12 mo</span></span><span class="sub">1 mo ${chg(st.r1m)}</span>${sparkSvg(E.stock(s).px.slice(-Y), up ? css('--good') : css('--bad'))}</a>`;
     }).join('');
     const by = [...ALL].sort((a, b) => ST[b].r12m - ST[a].r12m);
     const stormy = [...ALL].sort((a, b) => ST[b].volTrend - ST[a].volTrend);
