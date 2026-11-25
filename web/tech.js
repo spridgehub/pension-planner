@@ -15,6 +15,7 @@
   const rgba = (color, a) => { const c = document.createElement('canvas').getContext('2d'); c.fillStyle = color; const h = c.fillStyle; if (!h.startsWith('#')) return color; const n = parseInt(h.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
 
   const ALL = E.STOCKS.map((s) => s.symbol);
+  const chg = (v) => (v == null || !isFinite(v) ? '<span class="chg">n/a</span>' : `<span class="chg ${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '▲' : '▼'} ${spc(v)}</span>`);
   // Fixed colour slot per stock (8-colour reference palette); a second pick sharing a slot is dashed.
   const SLOT = { NVDA: 6, AVGO: 8, AMD: 2, TSM: 3, MSFT: 1, GOOGL: 4, AMZN: 5, META: 7, ORCL: 2, AAPL: 3, TSLA: 8, TEAM: 1, CRM: 4, NOW: 5, ADBE: 6, PLTR: 7 };
   const col = (s) => (s === '^NDX' ? css('--ink-3') : css(`--s${SLOT[s] ?? 1}`));
@@ -52,7 +53,8 @@
   function renderAll() {
     $('tech-tiles').innerHTML = ALL.map((s) => {
       const st = ST[s];
-      return `<a class="cell tile" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="sub">12 mo ${spc(st.r12m)} · vol ${pc(st.vols[252])}</span>${sparkSvg(E.stock(s).px.slice(-Y), col(s))}</a>`;
+      const up = st.r12m >= 0;
+      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}, ${spc(st.r12m)} over 12 months"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="moves">${chg(st.r12m)} <span class="per">12 mo</span></span><span class="sub">1 mo ${chg(st.r1m)}</span>${sparkSvg(E.stock(s).px.slice(-Y), up ? css('--good') : css('--bad'))}</a>`;
     }).join('');
     const by = [...ALL].sort((a, b) => ST[b].r12m - ST[a].r12m);
     const stormy = [...ALL].sort((a, b) => ST[b].volTrend - ST[a].volTrend);

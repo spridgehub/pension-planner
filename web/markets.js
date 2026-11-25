@@ -101,10 +101,14 @@
     if (!u) return Math.round(p.local).toLocaleString('en-GB');
     return id === 'gold' || id === 'platinum' ? `${gbp(p.gbp)}/${u}` : id === 'silver' ? `£${p.gbp.toFixed(2)}/${u}` : `${usd(p.local, 2)}/${u}`;
   };
+  // Direction at a glance: arrow plus green or red (never colour alone).
+  const chg = (v, suffix = '') => (v == null || !isFinite(v) ? '<span class="chg">n/a</span>' : `<span class="chg ${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '▲' : '▼'} ${spc(v)}${suffix}</span>`);
   function marketTiles(el, ids) {
+    const good = css('--good'), bad = css('--bad');
     $(el).innerHTML = ids.map((id) => {
       const s = E.series(id), st1 = E.stats(s, E.addMonths(LAST, -12)), st10 = E.stats(s, E.addMonths(LAST, -120));
-      return `<a class="cell tile" href="#m-${id}" aria-label="Open the ${esc(name(id))} page"><span class="lbl"><i style="background:${col(id)}"></i>${esc(name(id))}</span><span class="go" aria-hidden="true">›</span><span class="val">${priceText(id)}</span><span class="sub">1 yr ${spc(st1?.total)} · 10 yr ${st10 ? pc(st10.cagr) + '/yr' : 'n/a'}</span>${sparkSvg(s.values.slice(-60), col(id))}</a>`;
+      const up = (st1?.total ?? 0) >= 0;
+      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#m-${id}" aria-label="Open the ${esc(name(id))} page, ${spc(st1?.total)} over 1 year"><span class="lbl"><i style="background:${col(id)}"></i>${esc(name(id))}</span><span class="go" aria-hidden="true">›</span><span class="val">${priceText(id)}</span><span class="moves">${chg(st1?.total)} <span class="per">1 yr</span></span><span class="sub">10 yr ${st10 ? chg(st10.cagr, '/yr') : 'n/a'}</span>${sparkSvg(s.values.slice(-13), up ? good : bad)}</a>`;
     }).join('');
   }
 

@@ -215,6 +215,14 @@ a.cell.tile .go { position: absolute; top: 8px; right: 10px; font: 600 18px/1 va
 a.cell.tile .lbl { padding-right: 14px; }
 #mkr-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .tiles .val { font-size: 19px; }
+.chg { font: 600 12px/1 var(--font-num); white-space: nowrap; color: var(--ink-3); }
+.chg.up { color: var(--good); } .chg.down { color: var(--bad); }
+.tiles .moves { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; }
+.tiles .moves .chg { font-size: 14px; padding: 3px 7px; border-radius: var(--r-pill); }
+.tiles .moves .chg.up { background: var(--good-bg); } .tiles .moves .chg.down { background: var(--bad-bg); }
+.tiles .moves .per { font-size: 11px; color: var(--ink-3); }
+a.cell.tile.is-up { box-shadow: inset 3px 0 0 var(--good), 1px 0 0 var(--rule), 0 1px 0 var(--rule); }
+a.cell.tile.is-down { box-shadow: inset 3px 0 0 var(--bad), 1px 0 0 var(--rule), 0 1px 0 var(--rule); }
 .mk-switch { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
 .mk-switch .grp { font: 600 11px/1 var(--font-ui); text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); margin: 0 4px 0 2px; }
 .mk-switch .grp:not(:first-child) { margin-left: 12px; }
@@ -1590,6 +1598,7 @@ a.cell.tile .lbl { padding-right: 14px; }
   const rgba = (color, a) => { const c = document.createElement('canvas').getContext('2d'); c.fillStyle = color; const h = c.fillStyle; if (!h.startsWith('#')) return color; const n = parseInt(h.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
 
   const ALL = E.STOCKS.map((s) => s.symbol);
+  const chg = (v) => (v == null || !isFinite(v) ? '<span class="chg">n/a</span>' : `<span class="chg ${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '▲' : '▼'} ${spc(v)}</span>`);
   // Fixed colour slot per stock (8-colour reference palette); a second pick sharing a slot is dashed.
   const SLOT = { NVDA: 6, AVGO: 8, AMD: 2, TSM: 3, MSFT: 1, GOOGL: 4, AMZN: 5, META: 7, ORCL: 2, AAPL: 3, TSLA: 8, TEAM: 1, CRM: 4, NOW: 5, ADBE: 6, PLTR: 7 };
   const col = (s) => (s === '^NDX' ? css('--ink-3') : css(`--s${SLOT[s] ?? 1}`));
@@ -1627,7 +1636,8 @@ a.cell.tile .lbl { padding-right: 14px; }
   function renderAll() {
     $('tech-tiles').innerHTML = ALL.map((s) => {
       const st = ST[s];
-      return `<a class="cell tile" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="sub">12 mo ${spc(st.r12m)} · vol ${pc(st.vols[252])}</span>${sparkSvg(E.stock(s).px.slice(-Y), col(s))}</a>`;
+      const up = st.r12m >= 0;
+      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#t-${s}" aria-label="Spotlight ${esc(nm(s))}, ${spc(st.r12m)} over 12 months"${s === T.spot ? ' style="background:var(--raised)"' : ''}><span class="lbl"><i style="background:${col(s)}"></i>${esc(nm(s))}</span><span class="go" aria-hidden="true">›</span><span class="val">${usd(st.price)}</span><span class="moves">${chg(st.r12m)} <span class="per">12 mo</span></span><span class="sub">1 mo ${chg(st.r1m)} · vol ${pc(st.vols[252])}</span>${sparkSvg(E.stock(s).px.slice(-Y), up ? css('--good') : css('--bad'))}</a>`;
     }).join('');
     const by = [...ALL].sort((a, b) => ST[b].r12m - ST[a].r12m);
     const stormy = [...ALL].sort((a, b) => ST[b].volTrend - ST[a].volTrend);
@@ -1995,10 +2005,14 @@ a.cell.tile .lbl { padding-right: 14px; }
     if (!u) return Math.round(p.local).toLocaleString('en-GB');
     return id === 'gold' || id === 'platinum' ? `${gbp(p.gbp)}/${u}` : id === 'silver' ? `£${p.gbp.toFixed(2)}/${u}` : `${usd(p.local, 2)}/${u}`;
   };
+  // Direction at a glance: arrow plus green or red (never colour alone).
+  const chg = (v, suffix = '') => (v == null || !isFinite(v) ? '<span class="chg">n/a</span>' : `<span class="chg ${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '▲' : '▼'} ${spc(v)}${suffix}</span>`);
   function marketTiles(el, ids) {
+    const good = css('--good'), bad = css('--bad');
     $(el).innerHTML = ids.map((id) => {
       const s = E.series(id), st1 = E.stats(s, E.addMonths(LAST, -12)), st10 = E.stats(s, E.addMonths(LAST, -120));
-      return `<a class="cell tile" href="#m-${id}" aria-label="Open the ${esc(name(id))} page"><span class="lbl"><i style="background:${col(id)}"></i>${esc(name(id))}</span><span class="go" aria-hidden="true">›</span><span class="val">${priceText(id)}</span><span class="sub">1 yr ${spc(st1?.total)} · 10 yr ${st10 ? pc(st10.cagr) + '/yr' : 'n/a'}</span>${sparkSvg(s.values.slice(-60), col(id))}</a>`;
+      const up = (st1?.total ?? 0) >= 0;
+      return `<a class="cell tile ${up ? 'is-up' : 'is-down'}" href="#m-${id}" aria-label="Open the ${esc(name(id))} page, ${spc(st1?.total)} over 1 year"><span class="lbl"><i style="background:${col(id)}"></i>${esc(name(id))}</span><span class="go" aria-hidden="true">›</span><span class="val">${priceText(id)}</span><span class="moves">${chg(st1?.total)} <span class="per">1 yr</span></span><span class="sub">10 yr ${st10 ? chg(st10.cagr, '/yr') : 'n/a'}</span>${sparkSvg(s.values.slice(-13), up ? good : bad)}</a>`;
     }).join('');
   }
 
