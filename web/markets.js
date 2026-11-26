@@ -165,9 +165,41 @@
     const under = rows.filter((r) => r.st && E.drawdowns(E.series(r.id, { ...o, from: e.from })).values.slice(-1)[0] < -0.05);
     $('eqd-h').textContent = rows.length ? `Every market here has fallen at least ${pc(Math.max(...rows.map((r) => r.st.maxDD)) * -1, 0)} at some point${under.length ? `; ${under.map((r) => name(r.id)).join(', ')} still sit more than 5% below a past high` : '; all are at or near their highs today'}` : '';
 
+    renderNow();
     renderAI();
     renderOutlook();
     renderMix();
+  }
+
+  // What's working now: sector, style, region and safe-haven funds over a chosen period.
+  function renderNow() {
+    const R0 = E.MARKETS.rotation;
+    if (!R0?.list?.length) { $('eq-now').hidden = true; return; }
+    const per = S.eq.nowPer ?? 'r1m';
+    const PER = { r1w: '1 week', r1m: '1 month', r3m: '3 months', r12m: '12 months' };
+    fixedSeg('eqn-per', per, (v) => { S.eq.nowPer = v; save(); renderNow(); });
+    const vix = R0.list.find((x) => x.symbol === '^VIX');
+    const list = R0.list.filter((x) => x.group !== 'Gauge').sort((a, b) => b[per] - a[per]);
+    const good = css('--good'), bad = css('--bad');
+    chart('ch-eqn', { type: 'bar', data: { labels: list.map((x) => `${x.name}  ·  ${x.group}`), datasets: [{ label: PER[per], data: list.map((x) => x[per]), backgroundColor: list.map((x) => (x[per] >= 0 ? good : bad)), borderRadius: 3, borderSkipped: 'start', barPercentage: 0.8, categoryPercentage: 0.9 }] },
+      options: (() => { const o = opts({ y: (v) => v }); o.indexAxis = 'y'; o.interaction = { mode: 'nearest', axis: 'y', intersect: false };
+        o.scales = { x: { ticks: { color: css('--ink-3'), callback: (v) => pc(v, 0), font: { family: css('--font-num'), size: 11 } }, grid: { color: (c) => (c.tick?.value === 0 ? css('--rule-strong') : css('--rule')) }, border: { display: false } },
+          y: { ticks: { color: css('--ink-2'), autoSkip: false, font: { family: css('--font-ui'), size: 11 } }, grid: { display: false } } };
+        o.plugins.tooltip.callbacks = { label: (c) => { const x = list[c.dataIndex]; return `${PER[per]} ${spc(x[per])} · 1 month ${spc(x.r1m)} · 12 months ${spc(x.r12m)} · ${pc(x.fromHigh, 0)} from 12-month high`; } };
+        return o; })() });
+    const grp = (g) => { const xs = R0.list.filter((x) => x.group === g); return xs.reduce((a, x) => a + x[per], 0) / xs.length; };
+    const groups = ['Tech', 'Defensive', 'Cyclical', 'Style', 'Regions', 'Safe havens'].map((g) => [g, grp(g)]).sort((a, b) => b[1] - a[1]);
+    $('eqn-h').textContent = `Over ${PER[per]}: ${list[0].name} led (${spc(list[0][per])}) and ${list[list.length - 1].name} lagged (${spc(list[list.length - 1][per])}). ${groups[0][0]} funds did best on average, ${groups[groups.length - 1][0].toLowerCase()} worst`;
+    const iwd = R0.list.find((x) => x.symbol === 'IWD'), iwf = R0.list.find((x) => x.symbol === 'IWF'), rsp = R0.list.find((x) => x.symbol === 'RSP'), xlk = R0.list.find((x) => x.symbol === 'XLK');
+    const notes = [];
+    if (vix) notes.push([`Fear gauge (VIX) ${vix.last.toFixed(1)}`, `${vix.last > 30 ? 'High: markets are pricing big daily swings.' : vix.last > 20 ? 'Elevated: above the calm-market level of about 15 to 20.' : 'Calm: typical of steady markets.'} It is ${spc(vix.r1m)} over a month.`]);
+    if (iwd && iwf) notes.push(['Value against growth', `Value shares ${spc(iwd[per])} against growth ${spc(iwf[per])} over ${PER[per]}. ${iwd[per] > iwf[per] ? 'Cheaper, steadier companies are being favoured over expensive fast-growers, as usually happens when interest rates rise.' : 'Growth is leading, as usually happens when rates are expected to fall.'}`]);
+    if (rsp && xlk) notes.push(['Is it the whole market?', `The equal-weight S&P 500 (every company the same size) is ${spc(rsp[per])} against ${spc(xlk[per])} for US tech. ${Math.abs(rsp[per]) < Math.abs(xlk[per]) / 2 ? 'The moves are concentrated in tech rather than across all shares.' : 'The move is broad, not just tech.'}`]);
+    notes.push(['Before switching', 'Past weeks say little about the next ones, and rotations reverse fast. Rebalancing back to a planned mix tends to beat chasing what just worked.']);
+    $('eqn-notes').innerHTML = notes.map(([h, t]) => `<div class="callout"><strong>${esc(h)}</strong><span>${esc(t)}</span></div>`).join('');
+    const cell = (v) => `<td class="${v == null ? '' : v < 0 ? 'down' : 'up'}">${spc(v)}</td>`;
+    $('tbl-eqn').innerHTML = '<thead><tr><th>Fund</th><th>Group</th><th>1 week</th><th>1 month</th><th>3 months</th><th>6 months</th><th>12 months</th><th>Year to date</th><th>From high</th><th>12 months</th></tr></thead><tbody>'
+      + R0.list.map((x) => `<tr><td><span class="name">${esc(x.name)}</span><span class="gloss">${esc(x.symbol)}</span></td><td style="font-family:var(--font-ui);font-size:12px;color:var(--ink-3)">${esc(x.group)}</td>${cell(x.r1w)}${cell(x.r1m)}${cell(x.r3m)}${cell(x.r6m)}${cell(x.r12m)}${cell(x.ytd)}<td>${pc(x.fromHigh, 0)}</td><td style="width:120px">${sparkSvg(x.weekly, x.r12m >= 0 ? good : bad)}</td></tr>`).join('') + '</tbody>';
   }
 
   function renderAI() {

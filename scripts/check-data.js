@@ -81,8 +81,11 @@ function checkAssets() {
     if (daysAgo(st.dates.at(-1)) > 6) err(`tech stocks last close ${st.dates.at(-1)}`);
     for (const x of st.list) if (x.px.length !== st.dates.length || !(x.px.at(-1) > 0)) err(`tech stock ${x.symbol}: bad series`);
   }
+  const rot = a.rotation?.list ?? [];
+  if (rot.length < 20) err(`rotation: only ${rot.length} funds`);
+  for (const x of rot) if (!isFinite(x.r1m) || Math.abs(x.r1m) > (x.symbol === '^VIX' ? 5 : 0.6)) err(`rotation ${x.symbol}: odd 1-month move ${x.r1m}`);
   let gl;
-  try { gl = read('data/gilts.json'); if (gl.gilts.length < 40) err(`gilts: only ${gl.gilts.length}`); if (daysAgo(gl.asOf) > 8) warn(`gilt prices from ${gl.asOf}`); } catch (e) { err(`gilts.json: ${e.message}`); }
+  try { gl = read('data/gilts.json'); if (gl.gilts.length < 40) err(`gilts: only ${gl.gilts.length}`); if ((gl.linkers ?? []).length < 15) warn(`index-linked gilts: only ${(gl.linkers ?? []).length}`); if (daysAgo(gl.asOf) > 8) warn(`gilt prices from ${gl.asOf}`); } catch (e) { err(`gilts.json: ${e.message}`); }
   try { const gy = read('data/gilt-yields.json'); if (gy.y10.length < 480) err('gilt-yields: too short'); } catch (e) { err(`gilt-yields.json: ${e.message}`); }
   let m;
   try { m = read('data/market-now.json'); if (daysAgo(m.fetched) > 4) err(`market-now.json fetched ${m.fetched}`); } catch (e) { err(`market-now.json: ${e.message}`); }

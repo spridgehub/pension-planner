@@ -6,7 +6,7 @@
 import { writeFileSync } from 'node:fs';
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (Macintosh) pension-planner/0.2' };
-const SERIES = { IUDBEDR: 'bankRate', IUDMNZC: 'gilt10', IUDLNZC: 'gilt20', IUDLRZC: 'real20', IUDLIZC: 'implied20' };
+const SERIES = { IUDBEDR: 'bankRate', IUDMNZC: 'gilt10', IUDLNZC: 'gilt20', IUDLRZC: 'real20', IUDLIZC: 'implied20', IUDSRZC: 'real5', IUDSIZC: 'implied5' };
 
 async function boe() {
   const url = 'https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2019&Dateto=now'
@@ -36,7 +36,7 @@ async function boe() {
   }
   return { latest, monthly };
 }
-const pick = (r) => ({ bankRate: r.bankRate, gilt10: r.gilt10, gilt20: r.gilt20, real20: r.real20, implied20: r.implied20 });
+const pick = (r) => ({ bankRate: r.bankRate, gilt10: r.gilt10, gilt20: r.gilt20, real20: r.real20, implied20: r.implied20, real5: r.real5, implied5: r.implied5 });
 
 async function ons() {
   const res = await fetch('https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/d7g7/mm23/data', { headers: UA });
@@ -76,7 +76,7 @@ const [b, c] = await Promise.all([boe(), ons()]);
 const out = {
   fetched: new Date().toISOString(),
   sources: {
-    boe: 'Bank of England Statistical Interactive Database (IUDBEDR, IUDMNZC, IUDLNZC, IUDLRZC, IUDLIZC)',
+    boe: 'Bank of England Statistical Interactive Database (IUDBEDR, IUDMNZC, IUDLNZC, IUDLRZC, IUDLIZC, IUDSRZC, IUDSIZC)',
     ons: 'ONS CPI annual rate 00: all items (D7G7)',
   },
   latest: { ...b.latest, cpi: { value: c.latest.cpi, date: c.latest.month } },

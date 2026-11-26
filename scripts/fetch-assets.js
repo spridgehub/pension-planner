@@ -231,6 +231,37 @@ const stocks = calendar.length > 1000 ? {
   }).filter(Boolean),
 } : prev?.stocks ?? null;
 
+// "What's working now": a year of daily closes for sector, style, region and safe-haven funds,
+// reduced to returns over set periods plus a weekly line for sparklines.
+const ROTATION = [
+  ['SMH', 'Chip stocks', 'Tech'], ['IGV', 'Software', 'Tech'], ['XLK', 'US tech sector', 'Tech'], ['XLC', 'Communication services', 'Tech'],
+  ['XLP', 'Consumer staples', 'Defensive'], ['XLV', 'Healthcare', 'Defensive'], ['XLU', 'Utilities', 'Defensive'],
+  ['XLF', 'Financials', 'Cyclical'], ['XLE', 'Energy', 'Cyclical'], ['XLI', 'Industrials', 'Cyclical'], ['XLB', 'Materials', 'Cyclical'], ['XLY', 'Consumer discretionary', 'Cyclical'], ['XLRE', 'Real estate', 'Cyclical'],
+  ['IWD', 'US value', 'Style'], ['IWF', 'US growth', 'Style'], ['RSP', 'S&P 500 equal-weight', 'Style'], ['IWM', 'US small companies', 'Style'],
+  ['^FTSE', 'FTSE 100', 'Regions'], ['^FTMC', 'FTSE 250', 'Regions'], ['VGK', 'Europe', 'Regions'], ['EWJ', 'Japan', 'Regions'], ['EEM', 'Emerging markets', 'Regions'],
+  ['GLD', 'Gold', 'Safe havens'], ['TLT', 'Long US Treasuries', 'Safe havens'], ['SHY', 'Short US Treasuries', 'Safe havens'],
+  ['^VIX', 'Fear gauge (VIX)', 'Gauge'],
+];
+const yAgo = new Date(); yAgo.setUTCFullYear(yAgo.getUTCFullYear() - 1); yAgo.setUTCDate(yAgo.getUTCDate() - 20);
+const rotation = { fetched: new Date().toISOString(), list: [] };
+for (const [symbol, name, group] of ROTATION) {
+  try {
+    const q = await daily(symbol, yAgo.toISOString().slice(0, 10));
+    const c = q.days.map(([, v]) => v), dts = q.days.map(([d]) => d), n = c.length, last = q.now ?? c[n - 1];
+    const back = (k) => (n > k ? c[n - 1 - k] : null);
+    const yStart = dts.findIndex((d) => d.slice(0, 4) === dts[n - 1].slice(0, 4)) - 1;
+    const ry = c.slice(-253);
+    rotation.list.push({ symbol, name, group, last, asOf: dts[n - 1],
+      r1w: last / back(5) - 1, r1m: last / back(21) - 1, r3m: last / back(63) - 1, r6m: last / back(126) - 1, r12m: last / ry[0] - 1,
+      ytd: yStart >= 0 ? last / c[yStart] - 1 : null, fromHigh: last / Math.max(...ry) - 1,
+      weekly: ry.filter((_, i) => (ry.length - 1 - i) % 5 === 0).map((v) => +v.toPrecision(5)) });
+  } catch (e) {
+    console.error(`rotation ${symbol}: ${e.message}`);
+    const old = prev?.rotation?.list?.find((x) => x.symbol === symbol);
+    if (old) rotation.list.push(old);
+  }
+}
+
 const series = (obj, from) => { const ks = months(from); return ks.map((k) => (obj[k] != null ? +obj[k].toPrecision(6) : null)); };
 // Yahoo's early FX history is patchy: start after the last gap longer than two months, then carry
 // a rate forward over any single missing month.
@@ -259,6 +290,7 @@ const out = {
   cape: { first: '1881-01', v: series(sh.cape, '1881-01') },
   live,
   stocks,
+  rotation,
   stale,
 };
 writeFileSync(new URL('../data/assets.json', import.meta.url), JSON.stringify(out) + '\n');

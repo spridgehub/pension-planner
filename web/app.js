@@ -481,7 +481,7 @@
 
 
   // ---------- gilt calculator ----------
-  const G = { mode: 'growth', shift: 0, show: 'total', lookback: 10, infl: 'implied', real: false };
+  const G = { mode: 'growth', shift: 0, show: 'total', lookback: 10, infl: 'implied', real: false, measure: 'value' };
   const G_AMOUNTS = [10000, 25000, 50000, 100000, 250000];
   const G_SHIFTS = [-200, -150, -100, -50, 0, 50, 100, 150, 200];
   const G_DEFAULT = { growth: 'Treasury 0.375% 2030', income: 'Treasury 4.125% 2029' };
@@ -599,15 +599,19 @@
     // value over time: yields unchanged, ranges from typical yield swings, an inflation yardstick
     const a = css('--accent-ink'), amber = css('--amber'), grey = css('--grey');
     const L = NOW.latest;
-    // Market-implied: the 20-year breakeven is on RPI, which runs about half a point above CPI over that span.
-    const INFL = { off: null, target: 0.02, cpi: L.cpi.value, implied: Math.max(0, L.implied20.value - 0.005) };
+    // Market-implied CPI: the 5-year breakeven is on RPI, which runs about a point above CPI until 2030.
+    const INFL = { off: null, target: 0.02, cpi: L.cpi.value, implied: Math.max(0, (L.implied5?.value ?? L.implied20.value) - 0.008) };
     const INFL_LABEL = { off: 'Off', target: '2% target', cpi: `CPI now ${pc(L.cpi.value, 1)}`, implied: `Market-implied ${pc(INFL.implied, 1)}` };
     const infl = INFL[G.infl];
-    const withInc = G.show === 'total';
-    const defl = (yrs) => (G.real && infl != null ? Math.pow(1 + infl, yrs) : 1);
+    const asPrice = G.measure === 'price';
+    const withInc = G.show === 'total' && !asPrice;
+    const defl = (yrs) => (G.real && infl != null && !asPrice ? Math.pow(1 + infl, yrs) : 1);
+    // Price mode: clean price per £100 nominal, capital only.
+    const px = (v) => v / h.nominal * 100;
+    const fmtV = (v) => (asPrice ? v.toFixed(2) : gbp(v));
     const bands = E.volBands(h, { lookbackYears: G.lookback, points: 48 });
     const labels = bands.map((p) => fmtDate(p.date));
-    const v = (p, k) => ((p[k] + (withInc ? p.income : 0)) / defl(p.years));
+    const v = (p, k) => (asPrice ? px(p[k]) : (p[k] + (withInc ? p.income : 0)) / defl(p.years));
     const ds = [
       { label: 'Wide range (19 in 20)', data: bands.map((p) => v(p, 'hi2')), borderWidth: 0, backgroundColor: rgba(a, 0.12), fill: '+1', pointRadius: 0 },
       { label: 'w-lo', data: bands.map((p) => v(p, 'lo2')), borderWidth: 0, backgroundColor: rgba(a, 0.12), fill: false, pointRadius: 0 },
@@ -617,36 +621,42 @@
     ];
     if (G.shift !== 0) {
       const sp = E.valuePath(h, G.shift, { points: 48 });
-      ds.push({ label: `Yields ${bpLabel(G.shift)} at once`, data: sp.map((p, i) => (p.value + (withInc ? bands[i].income : 0)) / defl(bands[i].years)), borderColor: G.shift > 0 ? amber : grey, borderWidth: 1.6, borderDash: [5, 3], pointRadius: 0, fill: false });
+      ds.push({ label: `Yields ${bpLabel(G.shift)} at once`, data: sp.map((p, i) => (asPrice ? px(p.value) : (p.value + (withInc ? bands[i].income : 0)) / defl(bands[i].years))), borderColor: G.shift > 0 ? amber : grey, borderWidth: 1.6, borderDash: [5, 3], pointRadius: 0, fill: false });
     }
-    if (infl != null) ds.push({ label: G.real ? 'You paid, in today\'s money' : `Keeping pace with ${pc(infl, 1)} inflation`, data: bands.map((p) => (G.real ? amount : amount * Math.pow(1 + infl, p.years))), borderColor: css('--bad'), borderWidth: 1.6, borderDash: [2, 3], pointRadius: 0, fill: false });
-    if (infl == null || !G.real) ds.push({ label: 'You paid', data: labels.map(() => amount), borderColor: css('--ink-3'), borderDash: [2, 4], borderWidth: 1, pointRadius: 0, fill: false });
-    const o = baseOptions({ xTitle: '', yTitle: G.real ? "Value in today's money" : withInc ? 'Capital plus interest' : 'Capital value' });
+    if (infl != null && !asPrice) ds.push({ label: G.real ? 'You paid, in today\'s money' : `Keeping pace with ${pc(infl, 1)} inflation`, data: bands.map((p) => (G.real ? amount : amount * Math.pow(1 + infl, p.years))), borderColor: css('--bad'), borderWidth: 1.6, borderDash: [2, 3], pointRadius: 0, fill: false });
+    if (asPrice) ds.push({ label: 'Price you paid', data: labels.map(() => g.price), borderColor: css('--ink-3'), borderDash: [2, 4], borderWidth: 1, pointRadius: 0, fill: false });
+    else if (infl == null || !G.real) ds.push({ label: 'You paid', data: labels.map(() => amount), borderColor: css('--ink-3'), borderDash: [2, 4], borderWidth: 1, pointRadius: 0, fill: false });
+    const o = baseOptions({ xTitle: '', yTitle: asPrice ? 'Clean price per £100' : G.real ? "Value in today's money" : withInc ? 'Capital plus interest' : 'Capital value', yMoney: !asPrice });
     o.scales.y.beginAtZero = false;
     o.plugins.tooltip.filter = (t) => !/-lo$/.test(t.dataset.label);
     o.plugins.tooltip.callbacks = { title: (it) => fmtDate(bands[it[0].dataIndex].date, true), label: (c) => {
       const p = bands[c.dataIndex];
-      if (c.dataset.label.startsWith('Wide')) return `19 in 20: ${gbp(v(p, 'lo2'))} to ${gbp(v(p, 'hi2'))}`;
-      if (c.dataset.label.startsWith('Likely')) return `2 in 3: ${gbp(v(p, 'lo1'))} to ${gbp(v(p, 'hi1'))}  (yields ±${Math.round(p.sd * 1e4)}bp)`;
-      return `${c.dataset.label}  ${gbp(c.parsed.y)}`;
+      if (c.dataset.label.startsWith('Wide')) return `19 in 20: ${fmtV(v(p, 'lo2'))} to ${fmtV(v(p, 'hi2'))}`;
+      if (c.dataset.label.startsWith('Likely')) return `2 in 3: ${fmtV(v(p, 'lo1'))} to ${fmtV(v(p, 'hi1'))}  (yields ±${Math.round(p.sd * 1e4)}bp)`;
+      return `${c.dataset.label}  ${fmtV(c.parsed.y)}`;
     } };
     chart('ch-gvalue', { type: 'line', data: { labels, datasets: ds }, options: o });
     $('g-key1').innerHTML = `<span><i style="background:${a};height:2px"></i>yields unchanged</span><span><i style="background:${rgba(a, 0.34)}"></i>2 in 3</span><span><i style="background:${rgba(a, 0.12)}"></i>19 in 20</span>`
-      + (infl != null ? `<span><i style="background:transparent;border-top:2px dashed ${css('--bad')};height:0;vertical-align:3px"></i>${G.real ? 'what you paid, in today\'s money' : 'keeping pace with inflation'}</span>` : '')
-      + `<span>Ranges close up at ${fmtDate(g.maturity, true)}: held to maturity, you get ${gbp(h.nominal)} back whatever yields do.</span>`;
+      + (infl != null && !asPrice ? `<span><i style="background:transparent;border-top:2px dashed ${css('--bad')};height:0;vertical-align:3px"></i>${G.real ? 'what you paid, in today\'s money' : 'keeping pace with inflation'}</span>` : '')
+      + `<span>Ranges close up at ${fmtDate(g.maturity, true)}: held to maturity, ${asPrice ? 'the price ends at 100' : `you get ${gbp(h.nominal)} back`} whatever yields do.</span>`;
     // controls
     const pick = (id, cur, fn) => document.querySelectorAll(`#${id} button`).forEach((b) => { b.setAttribute('aria-pressed', String(b.dataset.v === String(cur))); b.onclick = () => { fn(b.dataset.v); renderGilts(); }; });
     $('g-infl').innerHTML = Object.keys(INFL).map((k) => `<button type="button" data-v="${k}">${INFL_LABEL[k]}</button>`).join('');
+    pick('g-measure', G.measure, (x) => { G.measure = x; });
     pick('g-show', G.show, (x) => { G.show = x; });
+    document.querySelectorAll('#g-show button, #g-real button, #g-infl button').forEach((b) => { b.disabled = asPrice; b.style.opacity = asPrice ? 0.45 : ''; });
     pick('g-lookback', G.lookback, (x) => { G.lookback = +x; });
     pick('g-infl', G.infl, (x) => { G.infl = x; if (x === 'off') G.real = false; });
     pick('g-real', G.real ? '1' : '0', (x) => { G.real = x === '1'; if (G.real && G.infl === 'off') G.infl = 'implied'; });
     // headline at the chosen look-ahead date
     const at = E.bandAt(h, horizon, { lookbackYears: G.lookback });
-    const atV = (k) => (at[k] + (withInc ? at.income : 0)) / defl(at.years);
+    const atV = (k) => (asPrice ? px(at[k]) : (at[k] + (withInc ? at.income : 0)) / defl(at.years));
     const need = infl != null ? amount * Math.pow(1 + infl, at.years) : null;
     const lb = { 3: 'the last 3 years', 10: 'the last 10 years', 40: 'yield swings since 1985' }[G.lookback];
-    $('g-band-h').innerHTML = at.sd > 0
+    if (asPrice) $('g-band-h').innerHTML = at.sd > 0
+      ? `By ${fmtDate(at.date, true)} the clean price would likely be ${atV('lo1').toFixed(2)} to ${atV('hi1').toFixed(2)} per £100 (yields ±${Math.round(at.sd * 1e4)}bp, typical for ${lb}), and ${atV('lo2').toFixed(2)} to ${atV('hi2').toFixed(2)} in a bad or good year. It is ${g.price.toFixed(2)} today and rises towards 100 at maturity if yields stay put (${atV('base').toFixed(2)} by then).`
+      : `At maturity the price is 100, whatever yields have done; you paid ${g.price.toFixed(2)}.`;
+    else $('g-band-h').innerHTML = at.sd > 0
       ? `By ${fmtDate(at.date, true)}, ${withInc ? 'capital plus interest' : 'the capital'} would likely be ${gbp(atV('lo1'))} to ${gbp(atV('hi1'))}${G.real ? " in today's money" : ''} (yields ±${Math.round(at.sd * 1e4)}bp, typical for ${lb}), and ${gbp(atV('lo2'))} to ${gbp(atV('hi2'))} in a bad or good year.`
         + (need != null ? ` ${G.real ? `You paid ${gbp(amount)}; ` : `To keep pace with ${pc(infl, 1)} inflation it needs to be ${gbp(need)}; `}the middle case is ${atV('base') >= (G.real ? amount : need) ? 'ahead' : 'behind'} by ${gbp(Math.abs(atV('base') - (G.real ? amount : need)))}.` : '')
       : `At maturity you get ${gbp(h.nominal)} back${withInc ? ` plus ${gbp(at.income)} of interest after tax` : ''}, whatever yields have done${need != null ? `; keeping pace with ${pc(infl, 1)} inflation would need ${gbp(need)}` : ''}.`;
@@ -679,13 +689,14 @@
     $('g-sell-lbl').textContent = `Or a value to sell at on ${fmtDate(horizon, true)} £`;
     $('g-move').innerHTML = [
       ['Yield move', bpLabel(G.shift), `${pc(h.yield, 2)} to ${pc(ch.yield, 2)}`],
+      ['Price per £100', (ch.valueNow / h.nominal * 100).toFixed(2), `from ${g.price.toFixed(2)} now; ${(ch.capital / h.nominal * 100).toFixed(2)} on ${hz}`],
       ['Value straight after', gbp(ch.valueNow), `${ch.changeNow >= 0 ? '+' : '−'}${gbp(Math.abs(ch.changeNow))} (${(ch.changeNow / (h.nominal * g.price / 100) * 100).toFixed(1)}%)`],
       [`Capital on ${hz}`, gbp(ch.capital), `${ch.capital - base.capital >= 0 ? '+' : '−'}${gbp(Math.abs(ch.capital - base.capital))} vs no change`],
       ['Total by then', gbp(ch.total), `with ${gbp(ch.income)} interest after tax`],
       ['Return a year', pc(ch.annualised, 2), infl != null ? `${pc((1 + ch.annualised) / (1 + infl) - 1, 2)} after inflation` : `no change: ${pc(base.annualised, 2)}`],
-      ['Rule of thumb', `${(h.duration).toFixed(1)}% per 100bp`, 'duration: value change for a 1% yield move'],
+      ['Rule of thumb', `${(h.duration).toFixed(1)}% per 100bp`, 'price change for a 1% yield move'],
     ].map(([l, v, sub]) => `<div class="cell"><span class="lbl">${l}</span><span class="val">${v}</span><span class="sub">${sub}</span></div>`).join('');
-    $('tbl-gscen').innerHTML = `<thead><tr><th>Yields move</th><th>New yield</th><th>Value straight after</th><th>Capital on ${hz}</th><th>Interest by then, after tax</th><th>Total</th><th>Return a year</th>${infl != null ? `<th>After ${pc(infl, 1)} inflation</th>` : ''}</tr></thead><tbody>${sc.map((r) => `<tr class="${r.bp === G.shift ? 'hit' : ''}"><td>${bpLabel(r.bp)}</td><td>${pc(r.yield, 2)}</td><td>${gbp(r.valueNow)} <span class="gloss" style="display:inline">${Math.abs(r.changeNow) < 0.5 ? '±£0' : (r.changeNow > 0 ? '+' : '−') + gbp(Math.abs(r.changeNow))}</span></td><td>${gbp(r.capital)}</td><td>${gbp(r.income)}</td><td><b>${gbp(r.total)}</b></td><td>${pc(r.annualised, 2)}</td>${infl != null ? `<td class="${r.annualised < infl ? 'down' : ''}">${pc((1 + r.annualised) / (1 + infl) - 1, 2)}</td>` : ''}</tr>`).join('')}</tbody>`;
+    $('tbl-gscen').innerHTML = `<thead><tr><th>Yields move</th><th>New yield</th><th>Value straight after</th><th>Capital on ${hz}</th><th>Interest by then, after tax</th><th>Total</th><th>Return a year</th>${infl != null ? `<th>After ${pc(infl, 1)} inflation</th>` : ''}</tr></thead><tbody>${sc.map((r) => `<tr class="${r.bp === G.shift ? 'hit' : ''}"><td>${bpLabel(r.bp)}</td><td>${pc(r.yield, 2)}</td><td>${gbp(r.valueNow)} <span class="gloss" style="display:inline">${Math.abs(r.changeNow) < 0.5 ? '±£0' : (r.changeNow > 0 ? '+' : '−') + gbp(Math.abs(r.changeNow))}</span><span class="gloss">price ${(r.valueNow / h.nominal * 100).toFixed(2)}</span></td><td>${gbp(r.capital)}<span class="gloss">price ${(r.capital / h.nominal * 100).toFixed(2)}</span></td><td>${gbp(r.income)}</td><td><b>${gbp(r.total)}</b></td><td>${pc(r.annualised, 2)}</td>${infl != null ? `<td class="${r.annualised < infl ? 'down' : ''}">${pc((1 + r.annualised) / (1 + infl) - 1, 2)}</td>` : ''}</tr>`).join('')}</tbody>`;
 
     // schedule
     let cum = 0;

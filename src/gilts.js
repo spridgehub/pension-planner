@@ -252,3 +252,6 @@ export function volBands(h, { lookbackYears = 10, points = 48 } = {}) {
   return out;
 }
 export const bandAt = (h, dateIso, { lookbackYears = 10 } = {}) => bandPoint(h, d(dateIso), lookbackYears);
+
+// Index-linked gilts (real yields, RPI-linked), for the parking comparison.
+export const LINKERS = gilts.linkers ?? [];

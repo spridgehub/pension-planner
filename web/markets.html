@@ -4,6 +4,19 @@
   <nav class="strip tiles" id="eq-tickers" aria-label="Equity markets: open one"></nav>
   <p class="verdict" id="eq-verdict"></p>
 
+  <section class="panel" id="eq-now" aria-labelledby="eqn-h">
+    <span class="section-lbl">What's working now<span>sectors, styles, regions and safe havens · US-listed funds in dollars, FTSE indices in pounds</span></span>
+    <h2 class="headline" id="eqn-h"></h2>
+    <div class="controls">
+      <div class="ctl"><span class="lbl">Over</span><div class="seg" id="eqn-per"><button type="button" data-v="r1w">1 week</button><button type="button" data-v="r1m">1 month</button><button type="button" data-v="r3m">3 months</button><button type="button" data-v="r12m">12 months</button></div></div>
+    </div>
+    <div class="grid">
+      <div class="s7 gpane"><div class="chart" id="eqn-chart-wrap" style="height:560px"><canvas id="ch-eqn" aria-label="Return of each sector, style, region and safe haven over the chosen period"></canvas></div></div>
+      <div class="s5 gpane"><div class="callouts" id="eqn-notes" style="grid-template-columns:1fr"></div></div>
+    </div>
+    <details class="yours"><summary>Every fund, every period</summary><div class="tbl" style="margin-top:10px"><table id="tbl-eqn"></table></div></details>
+  </section>
+
   <section class="panel" aria-label="Equity settings">
     <div class="controls">
       <div class="ctl"><span class="lbl">Markets</span><div class="seg" id="eq-pick"></div></div>

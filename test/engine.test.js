@@ -169,3 +169,16 @@ test('pension relief: allowance traps, taper, carry forward, earnings cap', () =
   assert.equal(E.reliefPosition({ earnings: 0, otherIncome: 20000 }).maxRelieved, 3600);
   assert.equal(E.reliefPosition({ earnings: 80000, mpaa: true, employer: 4000 }).maxRelieved, 6000);
 });
+
+test('parking options: four routes, tax and inflation applied consistently', () => {
+  const rows = E.parkingOptions({ amount: 10000, years: 2, taxRate: 0.4, inflation: 0.03, savingsRate: 0.04 });
+  assert.deepEqual(rows.map((r) => r.id), ['savings', 'isa', 'gilt', 'linker']);
+  const s = rows[0], isa = rows[1];
+  assert.ok(Math.abs(s.net - 0.024) < 1e-9 && Math.abs(isa.net - 0.04) < 1e-9);
+  for (const r of rows) {
+    assert.ok(r.net <= r.gross + 1e-9);
+    assert.ok(Math.abs(r.end - 10000 * Math.pow(1 + r.net, 2)) < 1e-6);
+    assert.ok(Math.abs((1 + r.real) * 1.03 - (1 + r.net)) < 1e-9);
+  }
+  assert.ok(rows[2].net > s.net, 'a low-coupon gilt beats taxed savings at 40%');
+});

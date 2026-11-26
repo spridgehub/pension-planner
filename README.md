@@ -113,6 +113,15 @@ GOV.UK, HMRC and MoneyHelper, and alternatives once pension room runs out. rUK t
 The gilt calculator also takes any yield move in bp, or a value to sell at on the look-ahead date
 (worked back to the yield move it needs).
 
+## What's working now and parking cash
+
+- Equities page `#eq-now`: 25 sector, style, region and safe-haven funds plus the VIX over 1 week to
+  12 months (`assets.json` `rotation`), with notes on value vs growth and breadth.
+- Retirement page `#sec-park`: easy-access savings, cash ISA, the best short gilt after tax near the
+  horizon and the nearest index-linked gilt (`src/parking.js`; index-linked prices from
+  giltcalculator.co.uk, 5-year real yield and breakeven from the BoE), after tax and inflation.
+- Gilt calculator: chart in market value or clean price per £100; prices for every modelled move.
+
 ## Keeping it live
 
 - **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`
