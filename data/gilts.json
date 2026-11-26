@@ -16,7 +16,7 @@
    "coupon": 0.0375,
    "maturity": "2027-03-07",
    "price": 99.84,
-   "quotedYield": 0.0431
+   "quotedYield": 0.0432
   },
   {
    "ticker": "TG27",
@@ -24,7 +24,7 @@
    "coupon": 0.0125,
    "maturity": "2027-07-22",
    "price": 98.05,
-   "quotedYield": 0.043
+   "quotedYield": 0.0432
   },
   {
    "ticker": "TR27",
@@ -32,7 +32,7 @@
    "coupon": 0.0425,
    "maturity": "2027-12-07",
    "price": 99.7,
-   "quotedYield": 0.0455
+   "quotedYield": 0.045599999999999995
   },
   {
    "ticker": "TN28",
@@ -40,7 +40,7 @@
    "coupon": 0.00125,
    "maturity": "2028-01-31",
    "price": 95.57,
-   "quotedYield": 0.0401
+   "quotedYield": 0.04019999999999999
   },
   {
    "ticker": "TE28",
@@ -56,7 +56,7 @@
    "coupon": 0.045,
    "maturity": "2028-06-07",
    "price": 99.56,
-   "quotedYield": 0.048
+   "quotedYield": 0.0481
   },
   {
    "ticker": "TG28",
@@ -80,7 +80,7 @@
    "coupon": 0.005,
    "maturity": "2029-01-31",
    "price": 91.6,
-   "quotedYield": 0.045899999999999996
+   "quotedYield": 0.046
   },
   {
    "ticker": "T29K",
@@ -104,7 +104,7 @@
    "coupon": 0.00875,
    "maturity": "2029-10-22",
    "price": 89.77,
-   "quotedYield": 0.046799999999999994
+   "quotedYield": 0.046900000000000004
   },
   {
    "ticker": "T30",
@@ -128,7 +128,7 @@
    "coupon": 0.00375,
    "maturity": "2030-10-22",
    "price": 84.92,
-   "quotedYield": 0.0464
+   "quotedYield": 0.04650000000000001
   },
   {
    "ticker": "TR30",
@@ -167,7 +167,7 @@
    "coupon": 0.01,
    "maturity": "2032-01-31",
    "price": 82.74,
-   "quotedYield": 0.048
+   "quotedYield": 0.0481
   },
   {
    "ticker": "T32H",
@@ -191,7 +191,7 @@
    "coupon": 0.0325,
    "maturity": "2033-01-31",
    "price": 91.42,
-   "quotedYield": 0.0487
+   "quotedYield": 0.048799999999999996
   },
   {
    "ticker": "T33H",
@@ -340,7 +340,7 @@
    "name": "Treasury 3.25% 2044",
    "coupon": 0.0325,
    "maturity": "2044-01-22",
-   "price": 74.89,
+   "price": 74.88,
    "quotedYield": 0.0554
   },
   {
@@ -365,7 +365,7 @@
    "coupon": 0.0425,
    "maturity": "2046-12-07",
    "price": 84.35,
-   "quotedYield": 0.0555
+   "quotedYield": 0.0556
   },
   {
    "ticker": "TG47",
