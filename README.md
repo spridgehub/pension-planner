@@ -134,7 +134,7 @@ browser-like user agents, so Yahoo requests use the `pension-planner` agent.
 
 ## Keeping it live
 
-- **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`
+- **Several times a day** (launchd `com.spridge.pension-planner`: 06:20 and 21:30 daily, 18:20 on weekdays; `com.spridge.pension-planner.intraday`: weekdays 09:20 to 17:20 every two hours, skipped entirely while `~/bin/workhold` says Ian is on Citrix): `scripts/daily.sh`
   fetches BoE/ONS and market data, runs `scripts/check-data.js` and the tests, publishes with
   `~/bin/ship`, then waits until the live site serves the new `docs/build.txt`. If anything fails, the
   last good version stays live and an ntfy alert is sent (and a "fixed" one when it recovers).

@@ -60,7 +60,7 @@
     const stormy = [...ALL].sort((a, b) => ST[b].volTrend - ST[a].volTrend);
     const ndx = ST['^NDX'];
     $('tech-verdict').innerHTML = `Over 12 months ${esc(nm(by[0]))} led (${spc(ST[by[0]].r12m)}) and ${esc(nm(by[by.length - 1]))} lagged (${spc(ST[by[by.length - 1]].r12m)}), against ${spc(ndx.r12m)} for the Nasdaq-100. Swings are ${ndx.volTrend > 1.3 ? 'running hot' : ndx.volTrend < 0.8 ? 'unusually calm' : 'about normal'}: the Nasdaq-100's 1-month volatility is ${pc(ndx.vols[21])} against ${pc(ndx.vols[252])} over a year, and ${esc(nm(stormy[0]))}'s is ${(ST[stormy[0]].volTrend).toFixed(1)} times its yearly level.`
-      + `<small>Daily closes from Yahoo Finance to ${dmy(D[D.length - 1])}, in dollars, prices only. Updated twice a day. Not a recommendation to buy or sell.</small>`;
+      + `<small>Daily closes from Yahoo Finance to ${dmy(D[D.length - 1])}, in dollars, prices only. Updated several times a day. Not a recommendation to buy or sell.</small>`;
     renderSpot();
     render12m();
     renderMonths();

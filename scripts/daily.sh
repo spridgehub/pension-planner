@@ -8,7 +8,14 @@ cd "$(dirname "$0")/.."
 export PATH="/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 STATE="$HOME/Library/Logs/pension-planner-refresh.json"
 SITE="https://spridgehub.github.io/pension-planner"
-echo "=== refresh $(date '+%F %T')"
+# --intraday (weekday daytime runs): only when Ian is not on a Citrix work session; on work days
+# skip completely (no fetch, no commit, no upload) and leave it to the 18:20 run.
+if [ "${1:-}" = "--intraday" ]; then
+  if [ -x ~/bin/workhold ] && ~/bin/workhold -q; then exit 0; fi
+  echo "=== intraday refresh $(date '+%F %T')"
+else
+  echo "=== refresh $(date '+%F %T')"
+fi
 
 alert() {  # alert <status ok|fail> <message>
   local status="$1" msg="$2" topic last_status last_msg last_at now

@@ -696,7 +696,7 @@
     const D = E.DATA_STAMP, when = (iso) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const ageDays = (Date.now() - new Date(D.prices)) / 864e5;
     const rAge = D.research ? (Date.now() - new Date(D.research)) / 864e5 : 999;
-    $('data-stamp').textContent = `Market prices updated ${when(D.prices)} (automatically, twice a day). Research figures (valuations, AI weights, forecasts) last checked ${D.research ? new Date(D.research).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'n/a'}, refreshed monthly, and rolled forward with prices in between.${D.stale.length ? ` Not refreshed in the last run: ${D.stale.join(', ')}.` : ''}`;
+    $('data-stamp').textContent = `Market prices updated ${when(D.prices)} (automatically several times a day on weekdays, twice at weekends). Research figures (valuations, AI weights, forecasts) last checked ${D.research ? new Date(D.research).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'n/a'}, refreshed monthly, and rolled forward with prices in between.${D.stale.length ? ` Not refreshed in the last run: ${D.stale.join(', ')}.` : ''}`;
     if (ageDays > 3 || rAge > 75) {
       $('stale-banner').hidden = false;
       $('stale-banner').textContent = ageDays > 3 ? `Market prices on this page were last updated ${when(D.prices)}. The automatic update looks to have stopped, so figures may be out of date.` : `The research figures (valuations, AI weights, forecasts) were last checked ${Math.round(rAge)} days ago; prices are current.`;
