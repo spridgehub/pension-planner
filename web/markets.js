@@ -401,7 +401,80 @@
     const dd = c.pick.map((id) => ({ id, st: E.stats(E.series(id, o), c.from) })).filter((x) => x.st).sort((a, b) => a.st.maxDD - b.st.maxDD);
     $('cod-h').textContent = dd.length ? `${name(dd[0].id)} fell as much as ${pc(-dd[0].st.maxDD, 0)} (${mon(dd[0].st.ddPeak)} to ${mon(dd[0].st.ddTrough)})` : '';
 
+    renderShares();
     renderCoOutlook();
+  }
+
+  // Commodity shares: relative value against their commodity and peers.
+  const GROUP_COL = { 'Gold and silver': '--s4', Royalties: '--s7', Platinum: '--s5', 'Copper and diversified': '--s2', Oil: '--s8' };
+  function renderShares() {
+    const all = E.COMMODITY_STOCKS ?? [];
+    if (!all.length) { $('co-shares').hidden = true; return; }
+    const c = S.co;
+    const groups = ['All', ...new Set(all.map((x) => x.group))];
+    c.shGrp = groups.includes(c.shGrp) ? c.shGrp : 'All';
+    seg('csh-grp', groups.map((g) => [g, esc(g), g === 'All' ? null : css(GROUP_COL[g])]), c.shGrp, (g) => { c.shGrp = g; save(); renderShares(); });
+    const list = all.filter((x) => c.shGrp === 'All' || x.group === c.shGrp);
+    if (!list.some((x) => x.symbol === c.shSel)) c.shSel = list[0].symbol;
+    const sel = all.find((x) => x.symbol === c.shSel);
+    const comName = (k) => E.COMMODITY_STOCKS_META.commodities[k]?.name ?? k;
+    const price = (x) => (x.ccy === 'GBp' || x.ccy === 'GBX' ? `${Math.round(x.price).toLocaleString('en-GB')}p` : usd(x.price, x.price < 100 ? 2 : 0));
+    const cheap = [...list].filter((x) => !x.fund).sort((a, b) => a.score - b.score), dear = [...cheap].reverse();
+    const byG = (g) => { const xs = all.filter((x) => x.group === g); return xs.reduce((a, x) => a + x.ratioPct, 0) / xs.length; };
+    $('csh-h').textContent = c.shGrp === 'All'
+      ? `Gold and silver miners look dear against the metals (on average at the ${pc(byG('Gold and silver'), 0)} point of their 5-year range against the metal), while the big diversified miners look cheap against copper. On the screen, ${cheap.slice(0, 3).map((x) => x.name).join(', ')} come out cheapest and ${dear.slice(0, 2).map((x) => x.name).join(' and ')} dearest`
+      : `${c.shGrp}: ${cheap[0]?.name} looks cheapest on the screen and ${dear[0]?.name} dearest`;
+    // scatter
+    const spx = E.VALUATION_NOW?.spx?.fwdPe;
+    const pts = list.filter((x) => x.val?.fwdPe > 0);
+    chart('ch-csh', { type: 'scatter', data: { datasets: pts.map((x) => ({ label: x.name.replace(/ \(.*\)$/, ''), data: [{ x: x.ratioPct, y: Math.min(x.val.fwdPe, 40) }], backgroundColor: css(GROUP_COL[x.group]), borderColor: css('--panel'), borderWidth: 2, pointRadius: x.symbol === c.shSel ? 9 : 6, pointHoverRadius: 9, pointStyle: x.fund ? 'rectRot' : 'circle', sym: x.symbol })) },
+      plugins: [{ id: 'lbl', afterDatasetsDraw(ch) {
+        const ctx = ch.ctx; ctx.save(); ctx.font = `500 11px ${css('--font-ui')}`; ctx.fillStyle = css('--ink-2'); ctx.textBaseline = 'middle';
+        const a = ch.chartArea;
+        ch.data.datasets.forEach((d, i) => { const p = ch.getDatasetMeta(i).data[0]; if (!p || d.pointStyle === 'rectRot') return; const w = ctx.measureText(d.label).width; const left = p.x + 9 + w > a.right; ctx.textAlign = left ? 'right' : 'left'; ctx.fillText(d.label, left ? p.x - 9 : p.x + 9, p.y); });
+        ctx.textAlign = 'left'; ctx.fillStyle = css('--ink-3'); ctx.font = `600 11px ${css('--font-ui')}`;
+        ctx.fillText('Cheap on both', a.left + 6, a.bottom - 10); ctx.textAlign = 'right'; ctx.fillText('Dear on both', a.right - 6, a.top + 10);
+        if (spx) { const y = ch.scales.y.getPixelForValue(spx); ctx.strokeStyle = css('--grey'); ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(a.left, y); ctx.lineTo(a.right, y); ctx.stroke(); ctx.fillText(`S&P 500 ${spx.toFixed(1)}`, a.right - 6, y - 8); }
+        ctx.restore();
+      } }],
+      options: (() => { const o = opts({ y: (v) => v.toFixed(0) }); o.interaction = { mode: 'nearest', intersect: true };
+        o.scales.x = { ...o.scales.x, type: 'linear', min: 0, max: 1, title: { display: true, text: 'Share price against its commodity: 5-year percentile (low = cheap)', color: css('--ink-3') }, ticks: { ...o.scales.x.ticks, callback: (v) => pc(v, 0) } };
+        o.scales.y.title = { display: true, text: 'Forward P/E', color: css('--ink-3') }; o.scales.y.beginAtZero = true;
+        o.plugins.tooltip.callbacks = { label: (t) => `${t.dataset.label}: ${pc(t.parsed.x, 0)} of 5-year range against its commodity, forward P/E ${t.parsed.y.toFixed(1)}` };
+        o.onClick = (e, els) => { if (els[0]) { c.shSel = pts[els[0].datasetIndex].symbol; save(); renderShares(); } };
+        return o; })() });
+    key('csh-key', [...new Set(list.map((x) => x.group))].map((g) => [g, css(GROUP_COL[g])]).concat([['◆ = fund', 'transparent']]));
+    // table
+    const sigCell = (v) => (v == null ? '<td>n/a</td>' : `<td><span class="bar" style="width:${Math.round(8 + v * 60)}px;background:${v < 0.4 ? css('--good') : v > 0.6 ? css('--bad') : css('--grey')}"></span>${pc(v, 0)}</td>`);
+    const chgTd = (v) => `<td class="${v == null ? '' : v < 0 ? 'down' : 'up'}">${spc(v, 0)}</td>`;
+    const vv = (x, k, f) => (x.val?.[k] != null && isFinite(x.val[k]) ? f(x.val[k]) : 'n/a');
+    $('tbl-csh').innerHTML = '<thead><tr><th>Company</th><th>Price</th><th>1 month</th><th>12 months</th><th>Against commodity, 5-yr range</th><th>Fwd P/E</th><th>EV/EBITDA</th><th>Dividend</th><th>FCF yield</th><th>Screen</th></tr></thead><tbody>'
+      + list.map((x) => `<tr class="pick" data-s="${x.symbol}" tabindex="0" aria-selected="${x.symbol === c.shSel}"><td><span class="name"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:${css(GROUP_COL[x.group])}"></i>${esc(x.name)}</span><span class="gloss">${esc(x.symbol.replace('.L', ''))} · ${esc(x.listing)} · ${esc(comName(x.commodity).toLowerCase())}</span></td><td>${price(x)}</td>${chgTd(x.r1m)}<td class="${x.r12m < 0 ? 'down' : 'up'}">${spc(x.r12m, 0)}<span class="gloss">${esc(comName(x.commodity).toLowerCase())} ${spc(x.c12m, 0)}</span></td>${sigCell(x.ratioPct)}<td>${vv(x, 'fwdPe', (v) => v.toFixed(1))}</td><td>${vv(x, 'evEbitda', (v) => v.toFixed(1))}</td><td>${vv(x, 'divYield', (v) => pc(v, 1))}</td><td>${vv(x, 'fcfYield', (v) => pc(v, 1))}</td><td><span class="pill ${x.screen === 'Cheaper' ? 'good' : x.screen === 'Dearer' ? 'bad' : ''}">${x.screen === 'Cheaper' ? '▼ ' : x.screen === 'Dearer' ? '▲ ' : ''}${x.screen}</span></td></tr>`).join('') + '</tbody>';
+    $('tbl-csh').querySelectorAll('tr.pick').forEach((tr) => { const go = () => { c.shSel = tr.dataset.s; save(); renderShares(); }; tr.addEventListener('click', go); tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); });
+    // selected: ratio over 5 years, and 12 months vs commodity
+    const cn = comName(sel.commodity), colS = css(GROUP_COL[sel.group]);
+    $('csr-lbl').textContent = `${sel.name} ÷ ${cn.toLowerCase()} price, 5 years (1 = its average)`;
+    chart('ch-csr', { type: 'line', data: { labels: sel.dateWeekly.map((d) => mon(d.slice(0, 7))), datasets: [
+      { label: 'Ratio', data: sel.ratioWeekly, borderColor: colS, backgroundColor: rgba(colS, 0.1), fill: { target: { value: 1 } } },
+      { label: '5-year average', data: sel.ratioWeekly.map(() => 1), borderColor: css('--grey'), borderDash: [4, 3], borderWidth: 1 },
+    ] }, options: opts({ y: (v) => v.toFixed(2), tip: (t) => `${t.dataset.label}: ${t.parsed.y.toFixed(2)}` }) });
+    $('csp-lbl').textContent = `${sel.name} and ${cn.toLowerCase()}, last 12 months (in dollars, rebased to 100)`;
+    const rb = (a) => a.map((v) => 100 * v / a[0]);
+    chart('ch-csp', { type: 'line', data: { labels: sel.priceWeekly.map((_, i) => `${sel.priceWeekly.length - 1 - i}w ago`), datasets: [
+      { label: sel.name, data: rb(sel.priceWeekly), borderColor: colS, backgroundColor: colS },
+      { label: cn, data: rb(sel.comWeekly), borderColor: css('--ink-3'), borderDash: [5, 3], borderWidth: 1.5 },
+    ] }, options: opts({ y: (v) => v.toFixed(0), xTicks: 6, tip: (t) => `${t.dataset.label}: ${spc(t.parsed.y / 100 - 1)}` }) });
+    key('csp-key', [[sel.name, colS], [cn, css('--ink-3'), true]]);
+    // notes for the selected company and the method
+    const v = sel.val ?? {}, m = sel.groupMedian;
+    const sig = sel.signals;
+    $('csh-notes').innerHTML = [
+      [`${sel.name}: ${sel.screen.toLowerCase()} on the screen`, `Against ${cn.toLowerCase()} it sits at the ${pc(sel.ratioPct, 0)} point of its 5-year range (${spc(sel.ratioVsAvg, 0)} against its average). ${sig.ev != null ? `EV/EBITDA ${v.evEbitda.toFixed(1)} against a group median of ${m.ev.toFixed(1)}. ` : ''}${sig.fcf != null ? `Free-cash-flow yield ${pc(v.fcfYield, 1)} against ${pc(m.fcf, 1)}. ` : ''}${sel.fund ? 'A fund, so only the first signal applies.' : ''}${sel.group === 'Platinum' ? 'The only platinum share here, so it has no peers to compare with.' : ''}`],
+      ['How much it moves with the commodity', `Over the last year it moved ${sel.beta.toFixed(2)} times as much as ${cn.toLowerCase()} day to day (volatility ${pc(sel.vol, 0)} against ${pc(sel.cvol, 0)}). Miners are usually above 1: their costs are fixed, so profits swing more than the price.`],
+      ['Royalty and streaming companies', 'Franco-Nevada and Wheaton fund mines in return for a cut of output. No mining costs, so steadier margins, which is why they trade on much higher multiples than miners.'],
+      ['Oil majors', 'Shell, BP, Exxon and Chevron pay out much of their cash as dividends and buybacks, and move far less than oil itself (about a quarter as much). London-listed BP and Shell trade at lower multiples than their US peers.'],
+    ].map(([h, t]) => `<div class="note"><h3>${esc(h)}</h3><p>${esc(t)}</p></div>`).join('');
+    $('csh-foot').textContent = `Prices from Yahoo Finance to ${new Date(E.COMMODITY_STOCKS_META.fetched).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}; London prices in pence, converted to dollars for the ratios. Valuations from stockanalysis.com, ${new Date(E.COMMODITY_STOCKS_META.valuationsFetched).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. Shares and funds listed here can be held in a SIPP or ISA. Not a recommendation to buy or sell.`;
   }
 
   function renderCoOutlook() {

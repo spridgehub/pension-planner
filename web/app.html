@@ -93,7 +93,7 @@ main.wrap { display: grid; gap: 16px; padding-block: 18px 40px; }
 .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r-panel); padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
 .grid > .panel { grid-column: span 12; align-self: start; }
 .panel .grid > .gpane { grid-column: span 12; min-width: 0; display: grid; gap: 8px; align-content: start; }
-@media (min-width: 1040px) { .panel .grid > .s7.gpane { grid-column: span 7; } .panel .grid > .s5.gpane { grid-column: span 5; } }
+@media (min-width: 1040px) { .panel .grid > .s7.gpane { grid-column: span 7; } .panel .grid > .s5.gpane { grid-column: span 5; } .panel .grid > .s6.gpane { grid-column: span 6; } }
 tr.hit td { background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
 tr.hit td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 @media (min-width: 1040px) { .grid > .s7 { grid-column: span 7; } .grid > .s5 { grid-column: span 5; } .grid > .s6 { grid-column: span 6; } }
@@ -251,7 +251,7 @@ a.cell.tile.is-down { box-shadow: inset 3px 0 0 var(--bad), 1px 0 0 var(--rule),
     <nav class="links" aria-label="Sections">
       <a href="#sec-board" data-in="retire">Board</a><a href="#sec-outcomes" data-in="retire">Outcomes</a><a href="#sec-backtest" data-in="retire">Backtest</a><a href="#sec-pots" data-in="retire">Pot size</a><a href="#sec-gilts" data-in="retire">Gilts</a><a href="#sec-park" data-in="retire">Parking cash</a><a href="#sec-relief" data-in="retire">Tax relief</a><a href="#sec-detail" data-tab="annuities" data-in="retire">Annuities</a><a href="#sec-detail" data-tab="method" data-in="retire">Method</a>
       <a href="#eq-now" data-in="equities" hidden>Now</a><a href="#eq-growth" data-in="equities" hidden>Growth</a><a href="#eq-stats" data-in="equities" hidden>Record</a><a href="#eq-ai" data-in="equities" hidden>AI exposure</a><a href="#eq-outlook" data-in="equities" hidden>Outlook</a><a href="#eq-mix" data-in="equities" hidden>Mix</a>
-      <a href="#co-long" data-in="commodities" hidden>Gold history</a><a href="#co-growth" data-in="commodities" hidden>Growth</a><a href="#co-crisis" data-in="commodities" hidden>In a crash</a><a href="#co-outlook" data-in="commodities" hidden>Outlook</a><a href="#co-how" data-in="commodities" hidden>Holding</a>
+      <a href="#co-shares" data-in="commodities" hidden>Shares</a><a href="#co-long" data-in="commodities" hidden>Gold history</a><a href="#co-growth" data-in="commodities" hidden>Growth</a><a href="#co-crisis" data-in="commodities" hidden>In a crash</a><a href="#co-outlook" data-in="commodities" hidden>Outlook</a><a href="#co-how" data-in="commodities" hidden>Holding</a>
       <a href="#tech-spot" data-in="tech" hidden>Spotlight</a><a href="#tech-12m" data-in="tech" hidden>12 months</a><a href="#tech-months" data-in="tech" hidden>Month by month</a><a href="#tech-vol" data-in="tech" hidden>Volatility</a><a href="#tech-range" data-in="tech" hidden>Ranges</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://claude.ai/artifact/Cju7XctP7MUPxtmkppJGGu" target="_blank" rel="noopener" class="ext">Hub</a><a href="https://github.com/spridgehub/pension-planner" target="_blank" rel="noopener" class="ext">Code</a>

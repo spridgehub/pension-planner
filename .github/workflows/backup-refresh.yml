@@ -37,6 +37,7 @@ jobs:
           node scripts/fetch-market.js || echo "BoE/ONS fetch failed, keeping previous"
           node scripts/fetch-gilts.js || echo "gilt prices fetch failed, keeping previous"
           node scripts/fetch-assets.js
+          node scripts/fetch-commodity-stocks.js || echo "commodity shares fetch failed, keeping previous"
           node scripts/check-data.js
           npm test
           node scripts/build-web.js

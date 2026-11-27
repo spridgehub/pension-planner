@@ -84,6 +84,7 @@ function checkAssets() {
   const rot = a.rotation?.list ?? [];
   if (rot.length < 20) err(`rotation: only ${rot.length} funds`);
   for (const x of rot) if (!isFinite(x.r1m) || Math.abs(x.r1m) > (x.symbol === '^VIX' ? 5 : 0.6)) err(`rotation ${x.symbol}: odd 1-month move ${x.r1m}`);
+  try { const cs = read('data/commodity-stocks.json'); if (cs.stocks.length < 15) err(`commodity shares: only ${cs.stocks.length}`); if (daysAgo(cs.fetched) > 4) err(`commodity shares fetched ${cs.fetched}`); for (const x of cs.stocks) if (!(x.price > 0) || !isFinite(x.ratioPct)) err(`commodity share ${x.symbol}: bad data`); } catch (e) { err(`commodity-stocks.json: ${e.message}`); }
   let gl;
   try { gl = read('data/gilts.json'); if (gl.gilts.length < 40) err(`gilts: only ${gl.gilts.length}`); if ((gl.linkers ?? []).length < 15) warn(`index-linked gilts: only ${(gl.linkers ?? []).length}`); if (daysAgo(gl.asOf) > 8) warn(`gilt prices from ${gl.asOf}`); } catch (e) { err(`gilts.json: ${e.message}`); }
   try { const gy = read('data/gilt-yields.json'); if (gy.y10.length < 480) err('gilt-yields: too short'); } catch (e) { err(`gilt-yields.json: ${e.message}`); }

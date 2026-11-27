@@ -122,6 +122,16 @@ The gilt calculator also takes any yield move in bp, or a value to sell at on th
   giltcalculator.co.uk, 5-year real yield and breakeven from the BoE), after tax and inflation.
 - Gilt calculator: chart in market value or clean price per £100; prices for every modelled move.
 
+## Commodity shares
+
+Commodities page `#co-shares` (`scripts/fetch-commodity-stocks.js` → `data/commodity-stocks.json`,
+`src/cstocks.js`): 21 gold, silver and platinum miners, royalty companies, copper and diversified
+miners and oil majors (US and London-listed), each against its commodity: 12-month moves, how much
+it moves with the commodity, where the share-to-commodity ratio sits in its 5-year range, and
+valuations from stockanalysis.com (refreshed at most every 20 hours). A relative value screen
+averages the ratio percentile, EV/EBITDA and FCF yield against group medians. Note: Yahoo throttles
+browser-like user agents, so Yahoo requests use the `pension-planner` agent.
+
 ## Keeping it live
 
 - **Twice a day** (launchd `com.spridge.pension-planner`, 06:20 and 21:30): `scripts/daily.sh`

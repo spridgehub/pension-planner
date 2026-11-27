@@ -141,6 +141,27 @@
   </section>
 
   <div class="grid">
+    <section class="panel" id="co-shares" aria-labelledby="csh-h">
+      <span class="section-lbl">Commodity shares<span>miners, royalty companies and oil majors against the commodity they depend on · valuations from stockanalysis.com</span></span>
+      <h2 class="headline" id="csh-h"></h2>
+      <p class="subtitle">Shares in producers are a geared, income-paying way into commodities: they pay dividends, but carry company, cost and country risks the metal does not. Relative value here is a screen of three signals, each set against the share's own history or its peers: price against the commodity over 5 years, EV/EBITDA and free-cash-flow yield. It describes prices, not where they go next.</p>
+      <div class="controls"><div class="ctl"><span class="lbl">Show</span><div class="seg" id="csh-grp"></div></div></div>
+      <div class="grid">
+        <div class="s7 gpane">
+          <span class="lbl">Price against its commodity (5-year percentile) and forward P/E</span>
+          <div class="key" id="csh-key"></div>
+          <div class="chart tall"><canvas id="ch-csh" aria-label="Each share by its price against its commodity and its forward P/E"></canvas></div>
+        </div>
+        <div class="s5 gpane"><div class="notes" id="csh-notes"></div></div>
+      </div>
+      <div class="tbl"><table id="tbl-csh"></table></div>
+      <div class="grid">
+        <div class="s6 gpane"><span class="lbl" id="csr-lbl"></span><div class="chart sm"><canvas id="ch-csr" aria-label="Share price divided by commodity price over five years"></canvas></div></div>
+        <div class="s6 gpane"><span class="lbl" id="csp-lbl"></span><div class="key" id="csp-key"></div><div class="chart sm"><canvas id="ch-csp" aria-label="Share and commodity over 12 months, rebased to 100"></canvas></div></div>
+      </div>
+      <p class="subtitle" id="csh-foot"></p>
+    </section>
+
     <section class="panel" id="co-long" aria-labelledby="col-h">
       <span class="section-lbl">Gold over 50 years<span>in pounds after UK inflation, log scale</span></span>
       <h2 class="headline" id="col-h"></h2>
