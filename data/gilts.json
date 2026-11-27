@@ -8,7 +8,7 @@
    "coupon": 0.04125,
    "maturity": "2027-01-29",
    "price": 99.97,
-   "quotedYield": 0.043
+   "quotedYield": 0.0431
   },
   {
    "ticker": "TS27",
@@ -16,7 +16,7 @@
    "coupon": 0.0375,
    "maturity": "2027-03-07",
    "price": 99.83,
-   "quotedYield": 0.0436
+   "quotedYield": 0.0438
   },
   {
    "ticker": "TG27",
@@ -24,7 +24,7 @@
    "coupon": 0.0125,
    "maturity": "2027-07-22",
    "price": 98.06,
-   "quotedYield": 0.043
+   "quotedYield": 0.0434
   },
   {
    "ticker": "TR27",
@@ -40,7 +40,7 @@
    "coupon": 0.00125,
    "maturity": "2028-01-31",
    "price": 95.53,
-   "quotedYield": 0.0405
+   "quotedYield": 0.0408
   },
   {
    "ticker": "TE28",
@@ -56,7 +56,7 @@
    "coupon": 0.045,
    "maturity": "2028-06-07",
    "price": 99.49,
-   "quotedYield": 0.048499999999999995
+   "quotedYield": 0.048600000000000004
   },
   {
    "ticker": "TG28",
@@ -64,7 +64,7 @@
    "coupon": 0.01625,
    "maturity": "2028-10-22",
    "price": 94.43,
-   "quotedYield": 0.0472
+   "quotedYield": 0.0473
   },
   {
    "ticker": "TR28",
@@ -72,7 +72,7 @@
    "coupon": 0.06,
    "maturity": "2028-12-07",
    "price": 102.55,
-   "quotedYield": 0.0467
+   "quotedYield": 0.0466
   },
   {
    "ticker": "TG29",
@@ -80,7 +80,7 @@
    "coupon": 0.005,
    "maturity": "2029-01-31",
    "price": 91.54,
-   "quotedYield": 0.0463
+   "quotedYield": 0.0464
   },
   {
    "ticker": "T29K",
@@ -88,7 +88,7 @@
    "coupon": 0.04,
    "maturity": "2029-05-22",
    "price": 98.04,
-   "quotedYield": 0.0484
+   "quotedYield": 0.048499999999999995
   },
   {
    "ticker": "TS29",
@@ -96,7 +96,7 @@
    "coupon": 0.04125,
    "maturity": "2029-07-22",
    "price": 98.39,
-   "quotedYield": 0.04769999999999999
+   "quotedYield": 0.0478
   },
   {
    "ticker": "TR29",
@@ -104,7 +104,7 @@
    "coupon": 0.00875,
    "maturity": "2029-10-22",
    "price": 89.6,
-   "quotedYield": 0.0475
+   "quotedYield": 0.04769999999999999
   },
   {
    "ticker": "T30",
@@ -128,7 +128,7 @@
    "coupon": 0.00375,
    "maturity": "2030-10-22",
    "price": 84.73,
-   "quotedYield": 0.047
+   "quotedYield": 0.0471
   },
   {
    "ticker": "TR30",
@@ -167,7 +167,7 @@
    "coupon": 0.01,
    "maturity": "2032-01-31",
    "price": 82.5,
-   "quotedYield": 0.048600000000000004
+   "quotedYield": 0.0487
   },
   {
    "ticker": "T32H",
@@ -191,7 +191,7 @@
    "coupon": 0.0325,
    "maturity": "2033-01-31",
    "price": 91.18,
-   "quotedYield": 0.0492
+   "quotedYield": 0.0493
   },
   {
    "ticker": "T33H",
@@ -207,7 +207,7 @@
    "coupon": 0.00875,
    "maturity": "2033-07-31",
    "price": 77.11,
-   "quotedYield": 0.049400000000000006
+   "quotedYield": 0.0495
   },
   {
    "name": "Treasury 4.250% 2034",
@@ -230,7 +230,7 @@
    "coupon": 0.00625,
    "maturity": "2035-07-31",
    "price": 69.15,
-   "quotedYield": 0.0506
+   "quotedYield": 0.0507
   },
   {
    "ticker": "T35V",
@@ -269,7 +269,7 @@
    "coupon": 0.0375,
    "maturity": "2038-01-29",
    "price": 87.32,
-   "quotedYield": 0.0526
+   "quotedYield": 0.0527
   },
   {
    "ticker": "TR38",
@@ -285,7 +285,7 @@
    "coupon": 0.01125,
    "maturity": "2039-01-31",
    "price": 62.87,
-   "quotedYield": 0.053
+   "quotedYield": 0.053099999999999994
   },
   {
    "ticker": "TG40",
@@ -373,7 +373,7 @@
    "coupon": 0.015,
    "maturity": "2047-07-22",
    "price": 49.91,
-   "quotedYield": 0.056299999999999996
+   "quotedYield": 0.0564
   },
   {
    "ticker": "TG49",
@@ -405,7 +405,7 @@
    "coupon": 0.0125,
    "maturity": "2051-07-31",
    "price": 41.7,
-   "quotedYield": 0.056600000000000004
+   "quotedYield": 0.0567
   },
   {
    "ticker": "T52",
@@ -527,7 +527,7 @@
    "coupon": 0.0125,
    "maturity": "2027-11-22",
    "price": 101.24,
-   "realYield": -0.0001
+   "realYield": -0.0002
   },
   {
    "ticker": "T28",
@@ -583,7 +583,7 @@
    "coupon": 0.00125,
    "maturity": "2036-11-22",
    "price": 82.25,
-   "realYield": 0.021
+   "realYield": 0.021099999999999997
   },
   {
    "ticker": "TR37",
@@ -598,7 +598,7 @@
    "name": "Treasury Index-Linked 0.125% 2039",
    "coupon": 0.00125,
    "maturity": "2039-03-22",
-   "price": 76.8,
+   "price": 76.81,
    "realYield": 0.023
   },
   {
@@ -615,7 +615,7 @@
    "coupon": 0.00125,
    "maturity": "2041-08-10",
    "price": 72.32,
-   "realYield": 0.0236
+   "realYield": 0.023700000000000002
   },
   {
    "ticker": "T42A",
@@ -694,7 +694,7 @@
    "name": "Treasury Index-Linked 1.25% 2054",
    "coupon": 0.0125,
    "maturity": "2054-11-22",
-   "price": 75.39,
+   "price": 75.38,
    "realYield": 0.024700000000000003
   },
   {
@@ -726,7 +726,7 @@
    "name": "Treasury Index-Linked 0.375% 2062",
    "coupon": 0.00375,
    "maturity": "2062-03-22",
-   "price": 53.28,
+   "price": 53.29,
    "realYield": 0.0232
   },
   {
