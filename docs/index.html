@@ -1707,7 +1707,7 @@ a.cell.tile.is-down { box-shadow: inset 3px 0 0 var(--bad), 1px 0 0 var(--rule),
     const stormy = [...ALL].sort((a, b) => ST[b].volTrend - ST[a].volTrend);
     const ndx = ST['^NDX'];
     $('tech-verdict').innerHTML = `Over 12 months ${esc(nm(by[0]))} led (${spc(ST[by[0]].r12m)}) and ${esc(nm(by[by.length - 1]))} lagged (${spc(ST[by[by.length - 1]].r12m)}), against ${spc(ndx.r12m)} for the Nasdaq-100. Swings are ${ndx.volTrend > 1.3 ? 'running hot' : ndx.volTrend < 0.8 ? 'unusually calm' : 'about normal'}: the Nasdaq-100's 1-month volatility is ${pc(ndx.vols[21])} against ${pc(ndx.vols[252])} over a year, and ${esc(nm(stormy[0]))}'s is ${(ST[stormy[0]].volTrend).toFixed(1)} times its yearly level.`
-      + `<small>Daily closes from Yahoo Finance to ${dmy(D[D.length - 1])}, in dollars, prices only. Updated twice a day. Not a recommendation to buy or sell.</small>`;
+      + `<small>Daily closes from Yahoo Finance to ${dmy(D[D.length - 1])}, in dollars, prices only. Updated several times a day. Not a recommendation to buy or sell.</small>`;
     renderSpot();
     render12m();
     renderMonths();
@@ -2719,7 +2719,7 @@ a.cell.tile.is-down { box-shadow: inset 3px 0 0 var(--bad), 1px 0 0 var(--rule),
     const D = E.DATA_STAMP, when = (iso) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const ageDays = (Date.now() - new Date(D.prices)) / 864e5;
     const rAge = D.research ? (Date.now() - new Date(D.research)) / 864e5 : 999;
-    $('data-stamp').textContent = `Market prices updated ${when(D.prices)} (automatically, twice a day). Research figures (valuations, AI weights, forecasts) last checked ${D.research ? new Date(D.research).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'n/a'}, refreshed monthly, and rolled forward with prices in between.${D.stale.length ? ` Not refreshed in the last run: ${D.stale.join(', ')}.` : ''}`;
+    $('data-stamp').textContent = `Market prices updated ${when(D.prices)} (automatically several times a day on weekdays, twice at weekends). Research figures (valuations, AI weights, forecasts) last checked ${D.research ? new Date(D.research).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'n/a'}, refreshed monthly, and rolled forward with prices in between.${D.stale.length ? ` Not refreshed in the last run: ${D.stale.join(', ')}.` : ''}`;
     if (ageDays > 3 || rAge > 75) {
       $('stale-banner').hidden = false;
       $('stale-banner').textContent = ageDays > 3 ? `Market prices on this page were last updated ${when(D.prices)}. The automatic update looks to have stopped, so figures may be out of date.` : `The research figures (valuations, AI weights, forecasts) were last checked ${Math.round(rAge)} days ago; prices are current.`;
